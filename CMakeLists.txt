@@ -60,7 +60,6 @@ endif ()
 add_definitions (-DBUILDER_STATIC_DEFINE)
 if (NOT ${CMAKE_BUILD_TYPE} MATCHES "Release")
     add_definitions (-DDEBUG)
-    set (BUILD_TYPE "dbg")
 
     if (MSVC)
         # Remove all previously declared flags before adding new ones
@@ -72,19 +71,12 @@ if (NOT ${CMAKE_BUILD_TYPE} MATCHES "Release")
         # Verboseeeee
         string (APPEND CMAKE_CXX_FLAGS " -Wall -Wextra -pedantic -Wformat=2 -Wsign-conversion -Wundef -Wredundant-decls -Wwrite-strings -Wpointer-arith -Wcast-qual -Wmissing-include-dirs -Wcast-align -Wctor-dtor-privacy -Wdisabled-optimization -Winvalid-pch -Woverloaded-virtual -Wconversion -Wswitch-enum -Wno-ctor-dtor-privacy -Wno-format-nonliteral -Wnoexcept -Wno-dangling-else -Wno-unused-local-typedefs -Wdouble-promotion -Wtrampolines -Wzero-as-null-pointer-constant -Wuseless-cast -Wvector-operation-performance -Wsized-deallocation -Wshadow -Wshift-overflow=2 -Wnull-dereference -Wduplicated-cond -Wpessimizing-move -Wredundant-move")
     endif ()
-else ()
-    set (BUILD_TYPE "rel")
 endif ()
 
 # Optimization and compiler specific fixes
 if (MSVC)
-    # Remove all previously declared flags before adding new ones
-    string (REGEX REPLACE "[/-][ML][DT]d? ?" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
-    string (REGEX REPLACE "[/-]O[12bdgistxy] ?" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
-    string (REGEX REPLACE "[/-]DEBUG:[a-zA-Z]+ ?" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
-
     # Enable max warnings (But dont spam the console)
-    string (APPEND CMAKE_CXX_FLAGS " /DNOMINMAX /wo5054")
+    set (CMAKE_CXX_FLAGS "/DNOMINMAX /wo5054")
 
     if (${CMAKE_BUILD_TYPE} MATCHES "Release")
         string (APPEND CMAKE_CXX_FLAGS " /MD /DEBUG:NONE /O2 /Ob2")
@@ -93,7 +85,7 @@ if (MSVC)
     endif ()
 else ()
     # 64-bit, and threading
-    string (APPEND CMAKE_CXX_FLAGS " -m64 -pthread")
+    set (CMAKE_CXX_FLAGS "-m64 -pthread")
 
     if (${CMAKE_BUILD_TYPE} MATCHES "Release")
         string (APPEND CMAKE_CXX_FLAGS " -fstack-protector -O3 -g0")
@@ -147,7 +139,10 @@ set (CMAKE_AUTORCC ON)
 message ("Found Qt ${Qt5Core_VERSION}")
 # -----------------------------
 
+add_subdirectory(external/fmt)
+
 include_directories (
+    ${CMAKE_CURRENT_SOURCE_DIR}/external/fmt/include
     ${Qt5Core_INCLUDE_DIRS}
     ${Qt5Gui_INCLUDE_DIRS}
     ${Qt5OpenGL_INCLUDE_DIRS}
@@ -167,12 +162,16 @@ include_directories(
 )
 
 set (${project}_SOURCES
-    ${CMAKE_CURRENT_SOURCE_DIR}/vrchttpclient.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/vrcphotonclient.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/fillrand.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/vrcgenworldlink.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/apiclient.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/photonclient.cpp
 )
 set (${project}_HEADERS
-    ${CMAKE_CURRENT_SOURCE_DIR}/vrchttpclient.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/vrcphotonclient.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/fillrand.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/vrcgenworldlink.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/apiclient.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/photonclient.h
 )
 add_executable (${project}
     main.cpp
@@ -187,10 +186,24 @@ target_link_directories (${project} PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/external/windows/LoadBalancing-cpp/lib
 )
 
+if (WIN32)
+    string(TOLOWER ${CMAKE_BUILD_TYPE} LC_BUILD_TYPE)
+    set (PHOTON_LIBRARIES
+        Photon-cpp_vc16_${LC_BUILD_TYPE}_windows_md_x64
+        Common-cpp_vc16_${LC_BUILD_TYPE}_windows_md_x64
+        LoadBalancing-cpp_vc16_${LC_BUILD_TYPE}_windows_md_x64
+        )
+else ()
+    set (PHOTON_LIBRARIES
+        libPhoton${CMAKE_BUILD_TYPE}64
+        libCommon${CMAKE_BUILD_TYPE}64
+        libLoadBalancing${CMAKE_BUILD_TYPE}64
+        )
+endif ()
+
+
 target_link_libraries (${project} PRIVATE
-    Photon-cpp_vc16_debug_windows_md_x64
-    Common-cpp_vc16_debug_windows_md_x64
-    LoadBalancing-cpp_vc16_debug_windows_md_x64
+    ${PHOTON_LIBRARIES}
     ${Qt5Core_LIBRARIES}
     ${Qt5Gui_LIBRARIES}
     ${Qt5OpenGL_LIBRARIES}
@@ -200,6 +213,7 @@ target_link_libraries (${project} PRIVATE
     ${Qt5SerialPort_LIBRARIES}
     ${Qt5Concurrent_LIBRARIES}
     ${Qt5Network_LIBRARIES}
+    fmt
 )
 
 message ("Building ${project} in ${CMAKE_BUILD_TYPE} mode for ${VPTR_BITS}-bit ${BUILD_OSL}, using ${BUILD_COMPILER}")

@@ -1,6 +1,6 @@
-#include "vrchttpclient.h"
+#include "apiclient.h"
 
-#include <random>
+#include "fillrand.h"
 
 #include <QtEndian>
 #include <QUrlQuery>
@@ -10,78 +10,22 @@
 #include <QNetworkCookie>
 #include <QNetworkCookieJar>
 
-std::mt19937_64 randgen;
-QByteArray generateRandomBytes(std::uint32_t size)
-{
-    randgen.seed(time(nullptr));
-
-    std::uint32_t size64 = (size / 8) + 1;
-
-    QByteArray bytes;
-    bytes.resize(size64 * 8);
-    char* data = bytes.data();
-
-    for (std::uint32_t i = 0; i < size64; i++) {
-        *reinterpret_cast<std::uint64_t*>(data + (i * 8)) = randgen();
-    }
-
-    bytes.resize(size);
-
-    return bytes;
-}
-
-QString VrcApiClient::genAuthCookie(const QString& username, const QString& password)
+QString VRChad::ApiClient::genAuthCookie(const QString& username, const QString& password)
 {
     return "Basic " + (QUrl::toPercentEncoding(username) + ":" + QUrl::toPercentEncoding(password)).toBase64();
 }
 
-QString VrcApiClient::genWorldLink(const QString& worldId, std::uint32_t lobbyId, Privacy privacy, Region region, const QString& userId)
+QByteArray VRChad::ApiClient::genHardwareId()
 {
-    QString worldLink = worldId + ":" + QString::number(lobbyId);
+    QByteArray bytes;
+    bytes.resize(42);
 
-    switch (region) {
-    case Region::US:
-        worldLink += "~region(us)";
-        break;
-    case Region::EU:
-        worldLink += "~region(eu)";
-        break;
-    case Region::JP:
-        worldLink += "~region(jp)";
-        break;
-    }
+    VRChad::Utils::FillRandHex(bytes.data(), bytes.size());
 
-    switch (privacy) {
-    case Privacy::Public:
-        break;
-    case Privacy::FriendsPlus:
-        worldLink += QString("~hidden(%1)").arg(userId);
-        break;
-    case Privacy::Friends:
-        worldLink += QString("~friends(%1)").arg(userId);
-        break;
-    case Privacy::InvitePlus:
-        worldLink += QString("~private(%1)~canRequestInvite").arg(userId);
-        break;
-    case Privacy::Invite:
-        worldLink += QString("~private(%1)").arg(userId);
-        break;
-    }
-
-    if (privacy != Privacy::Public) {
-        QString hex48 = generateRandomBytes(24).toHex().toUpper();
-        worldLink += QString("~nonce(%1)").arg(hex48);
-    }
-
-    return worldLink;
+    return bytes;
 }
 
-QByteArray VrcApiClient::genHardwareId()
-{
-    return generateRandomBytes(21).toHex();
-}
-
-VrcApiClient::VrcApiClient(QObject* parent)
+VRChad::ApiClient::ApiClient(QObject* parent)
     : QObject(parent)
     , m_baseUrl("https://api.vrchat.cloud")
     , m_apiPath("/api/1/")
@@ -105,22 +49,22 @@ VrcApiClient::VrcApiClient(QObject* parent)
 {
 }
 
-VrcApiClient::LoginStatus VrcApiClient::loginStatus() const
+VRChad::ApiClient::LoginStatus VRChad::ApiClient::loginStatus() const
 {
     return m_loginStatus;
 }
 
-QString VrcApiClient::currentUserId() const
+QString VRChad::ApiClient::currentUserId() const
 {
     return m_currentUserId;
 }
 
-QString VrcApiClient::photonAuthToken() const
+QString VRChad::ApiClient::photonAuthToken() const
 {
     return m_photonAuthToken;
 }
 
-void VrcApiClient::login(QString authCookie)
+void VRChad::ApiClient::login(QString authCookie)
 {
     if (loginStatus() == LoginStatus::LoggedOut) {
         setLoginStatus(LoginStatus::LoggingIn);
@@ -140,7 +84,7 @@ void VrcApiClient::login(QString authCookie)
     }
 }
 
-void VrcApiClient::setLoginStatus(VrcApiClient::LoginStatus status)
+void VRChad::ApiClient::setLoginStatus(VRChad::ApiClient::LoginStatus status)
 {
     if (m_loginStatus != status) {
         m_loginStatus = status;
@@ -148,7 +92,7 @@ void VrcApiClient::setLoginStatus(VrcApiClient::LoginStatus status)
     }
 }
 
-QNetworkRequest VrcApiClient::createApiRequest(const QString& ext, HttpContentType contentType, std::uint32_t contentLength, bool addQueries)
+QNetworkRequest VRChad::ApiClient::createApiRequest(const QString& ext, HttpContentType contentType, std::uint32_t contentLength, bool addQueries)
 {
     QUrl url = m_baseUrl.resolved(m_apiPath + ext);
 
@@ -189,7 +133,7 @@ QNetworkRequest VrcApiClient::createApiRequest(const QString& ext, HttpContentTy
     return req;
 }
 
-void VrcApiClient::apiGetHealth()
+void VRChad::ApiClient::apiGetHealth()
 {
     auto req = createApiRequest("health", HttpContentType::UrlEncoded, 0, false);
 
@@ -226,11 +170,11 @@ void VrcApiClient::apiGetHealth()
             qDebug() << data;
         }
     });
-    connect(reply, &QNetworkReply::sslErrors, this, &VrcApiClient::onSslError);
-    connect(reply, &QNetworkReply::errorOccurred, this, &VrcApiClient::onNetworkError);
+    connect(reply, &QNetworkReply::sslErrors, this, &VRChad::ApiClient::onSslError);
+    connect(reply, &QNetworkReply::errorOccurred, this, &VRChad::ApiClient::onNetworkError);
 }
 
-void VrcApiClient::apiGetConfig()
+void VRChad::ApiClient::apiGetConfig()
 {
     auto req = createApiRequest("config", HttpContentType::UrlEncoded, 0, true);
 
@@ -263,11 +207,11 @@ void VrcApiClient::apiGetConfig()
             qDebug() << data;
         }
     });
-    connect(reply, &QNetworkReply::sslErrors, this, &VrcApiClient::onSslError);
-    connect(reply, &QNetworkReply::errorOccurred, this, &VrcApiClient::onNetworkError);
+    connect(reply, &QNetworkReply::sslErrors, this, &VRChad::ApiClient::onSslError);
+    connect(reply, &QNetworkReply::errorOccurred, this, &VRChad::ApiClient::onNetworkError);
 }
 
-void VrcApiClient::apiGetLogin()
+void VRChad::ApiClient::apiGetLogin()
 {
     if (m_pendingAuth.isEmpty()) {
         return;
@@ -320,11 +264,11 @@ void VrcApiClient::apiGetLogin()
             setLoginStatus(LoginStatus::LoggedOut);
         }
     });
-    connect(reply, &QNetworkReply::sslErrors, this, &VrcApiClient::onSslError);
-    connect(reply, &QNetworkReply::errorOccurred, this, &VrcApiClient::onNetworkError);
+    connect(reply, &QNetworkReply::sslErrors, this, &VRChad::ApiClient::onSslError);
+    connect(reply, &QNetworkReply::errorOccurred, this, &VRChad::ApiClient::onNetworkError);
 }
 
-void VrcApiClient::apiGetUserInfo(const QString& userId)
+void VRChad::ApiClient::apiGetUserInfo(const QString& userId)
 {
     auto req = createApiRequest("users/" + userId, HttpContentType::UrlEncoded, 0, true);
 
@@ -342,11 +286,11 @@ void VrcApiClient::apiGetUserInfo(const QString& userId)
             qDebug() << data;
         }
     });
-    connect(reply, &QNetworkReply::sslErrors, this, &VrcApiClient::onSslError);
-    connect(reply, &QNetworkReply::errorOccurred, this, &VrcApiClient::onNetworkError);
+    connect(reply, &QNetworkReply::sslErrors, this, &VRChad::ApiClient::onSslError);
+    connect(reply, &QNetworkReply::errorOccurred, this, &VRChad::ApiClient::onNetworkError);
 }
 
-void VrcApiClient::apiGetWorldMetadata(const QString& worldId)
+void VRChad::ApiClient::apiGetWorldMetadata(const QString& worldId)
 {
     auto req = createApiRequest("worlds/" + worldId + "/metadata", HttpContentType::UrlEncoded, 0, true);
 
@@ -364,11 +308,11 @@ void VrcApiClient::apiGetWorldMetadata(const QString& worldId)
             qDebug() << data;
         }
     });
-    connect(reply, &QNetworkReply::sslErrors, this, &VrcApiClient::onSslError);
-    connect(reply, &QNetworkReply::errorOccurred, this, &VrcApiClient::onNetworkError);
+    connect(reply, &QNetworkReply::sslErrors, this, &VRChad::ApiClient::onSslError);
+    connect(reply, &QNetworkReply::errorOccurred, this, &VRChad::ApiClient::onNetworkError);
 }
 
-void VrcApiClient::apiPutPingWorld(const QString& userId, const QString& worldId)
+void VRChad::ApiClient::apiPutPingWorld(const QString& userId, const QString& worldId)
 {
     QJsonObject obj;
     obj.insert("userId", userId);
@@ -391,11 +335,11 @@ void VrcApiClient::apiPutPingWorld(const QString& userId, const QString& worldId
             qDebug() << data;
         }
     });
-    connect(reply, &QNetworkReply::sslErrors, this, &VrcApiClient::onSslError);
-    connect(reply, &QNetworkReply::errorOccurred, this, &VrcApiClient::onNetworkError);
+    connect(reply, &QNetworkReply::sslErrors, this, &VRChad::ApiClient::onSslError);
+    connect(reply, &QNetworkReply::errorOccurred, this, &VRChad::ApiClient::onNetworkError);
 }
 
-void VrcApiClient::onSslError(const QList<QSslError>& errors)
+void VRChad::ApiClient::onSslError(const QList<QSslError>& errors)
 {
     for (const QSslError& err : errors)
     {
@@ -403,7 +347,7 @@ void VrcApiClient::onSslError(const QList<QSslError>& errors)
     }
 }
 
-void VrcApiClient::onNetworkError(QNetworkReply::NetworkError err)
+void VRChad::ApiClient::onNetworkError(QNetworkReply::NetworkError err)
 {
     qDebug() << "NetworkError:" << err;
 }

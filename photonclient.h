@@ -1,22 +1,20 @@
-#ifndef VRCPHOTONCLIENT_H
-#define VRCPHOTONCLIENT_H
+#ifndef PHOTONCLIENT_H
+#define PHOTONCLIENT_H
 
 #include "LoadBalancing-cpp/inc/Client.h"
 
-#include <QMap>
-#include <QString>
-
 #include <thread>
+#include <unordered_map>
 
-class VrcPhotonClient : public ExitGames::LoadBalancing::Client, private ExitGames::LoadBalancing::Listener
+namespace VRChad {
+class PhotonClient : public ExitGames::LoadBalancing::Client, private ExitGames::LoadBalancing::Listener
 {
 public:
-    VrcPhotonClient(const QString& userId, const QString& authToken);
-    ~VrcPhotonClient();
+    PhotonClient(std::wstring_view userId, std::wstring_view authToken);
+    ~PhotonClient();
 
+    bool joinRoom(std::wstring_view roomId);
     bool leaveRoom();
-
-    QStringList availableRegions() const;
 private:
     void photonLoop();
 
@@ -80,7 +78,8 @@ private:
     std::thread m_photonThread;
     ExitGames::LoadBalancing::AuthenticationValues m_authValues;
 
-    QMap<QString, QString> m_regions;
+    std::unordered_map<std::wstring, std::wstring> m_regions;
 };
+}
 
-#endif // VRCPHOTONCLIENT_H
+#endif // PHOTONCLIENT_H

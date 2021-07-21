@@ -1,11 +1,12 @@
-#ifndef VRCHTTPCLIENT_H
-#define VRCHTTPCLIENT_H
+#ifndef APICLIENT_H
+#define APICLIENT_H
 
 #include <QObject>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 
-class VrcApiClient : public QObject {
+namespace VRChad {
+class ApiClient : public QObject {
     Q_OBJECT
 public:
     enum class LoginStatus
@@ -31,10 +32,9 @@ public:
     };
 
     static QString genAuthCookie(const QString& username, const QString& password);
-    static QString genWorldLink(const QString& worldId, std::uint32_t lobbyId, Privacy privacy, Region region, const QString& userId);
     static QByteArray genHardwareId();
 
-    VrcApiClient(QObject* parent = nullptr);
+    ApiClient(QObject* parent = nullptr);
 
     LoginStatus loginStatus() const;
     QString currentUserId() const;
@@ -98,5 +98,6 @@ private:
     QString m_currentUserId;
     QString m_currentAvatarId;
 };
+}
 
-#endif // VRCHTTPCLIENT_H
+#endif // APICLIENT_H
