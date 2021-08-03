@@ -77,16 +77,6 @@ void VRChad::PhotonClient::onStatusChanged(int statusCode)
     case ExitGames::Photon::StatusCode::CONNECT:
         fmt::print("PhotonClient connected\n");
         break;
-    case ExitGames::Photon::StatusCode::DISCONNECT:
-        fmt::print("PhotonClient disconnected\n");
-        if (m_nextOperation == NextOperation::ConnectToVRChat)
-        {
-            std::wstring_view addr = m_regions[m_selectedRegion];
-
-            fmt::print(L"Connecting to {}\n", addr);
-            connect(m_authValues, L"", addr.data(), ExitGames::LoadBalancing::ServerType::MASTER_SERVER);
-        }
-        break;
     case ExitGames::Photon::StatusCode::EXCEPTION:
         fmt::print("PhotonClient encountered an exception and will disconnect, too\n");
         break;
@@ -132,6 +122,8 @@ void VRChad::PhotonClient::onStatusChanged(int statusCode)
     case ExitGames::Photon::StatusCode::ENCRYPTION_FAILED_TO_ESTABLISH:
         fmt::print("PhotonClient Encryption failed, Check debug logs\n");
         break;
+    default:
+        return;
     }
 }
 
@@ -204,7 +196,14 @@ void VRChad::PhotonClient::connectReturn(int errorCode, const ExitGames::Common:
 
 void VRChad::PhotonClient::disconnectReturn()
 {
-    fmt::print("VRChad::VrcPhotonClient::disconnectReturn()\n");
+    fmt::print("PhotonClient disconnected\n");
+    if (m_nextOperation == NextOperation::ConnectToVRChat)
+    {
+        std::wstring_view addr = m_regions[m_selectedRegion];
+
+        fmt::print(L"Connecting to {}\n", addr);
+        connect(m_authValues, L"", addr.data(), ExitGames::LoadBalancing::ServerType::MASTER_SERVER);
+    }
 }
 
 void VRChad::PhotonClient::createRoomReturn(int, const ExitGames::Common::Hashtable&, const ExitGames::Common::Hashtable&, int, const ExitGames::Common::JString&)
