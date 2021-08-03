@@ -15,7 +15,7 @@ QString VRChad::ApiClient::genAuthCookie(const QString& username, const QString&
     return "Basic " + (QUrl::toPercentEncoding(username) + ":" + QUrl::toPercentEncoding(password)).toBase64();
 }
 
-QByteArray VRChad::ApiClient::genHardwareId()
+QString VRChad::ApiClient::genHardwareId()
 {
     QByteArray bytes;
     bytes.resize(42);
@@ -52,6 +52,11 @@ VRChad::ApiClient::ApiClient(QObject* parent)
 VRChad::ApiClient::LoginStatus VRChad::ApiClient::loginStatus() const
 {
     return m_loginStatus;
+}
+
+QString VRChad::ApiClient::currentHwid() const
+{
+    return m_hwid;
 }
 
 QString VRChad::ApiClient::currentUserId() const

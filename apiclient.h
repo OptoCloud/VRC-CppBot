@@ -32,11 +32,12 @@ public:
     };
 
     static QString genAuthCookie(const QString& username, const QString& password);
-    static QByteArray genHardwareId();
+    static QString genHardwareId();
 
     ApiClient(QObject* parent = nullptr);
 
     LoginStatus loginStatus() const;
+    QString currentHwid() const;
     QString currentUserId() const;
     QString photonAuthToken() const;
 
@@ -74,7 +75,7 @@ private:
     LoginStatus m_loginStatus;
     QString m_pendingAuth;
 
-    QByteArray m_hwid;
+    QString m_hwid;
     QString m_userAgent;
     QString m_unityVersion;
     QString m_clientVersion;

@@ -10,7 +10,7 @@ namespace VRChad {
 class PhotonClient : public ExitGames::LoadBalancing::Client, private ExitGames::LoadBalancing::Listener
 {
 public:
-    PhotonClient(std::wstring_view userId, std::wstring_view authToken);
+    PhotonClient(std::wstring_view userId, std::wstring_view authToken, std::wstring_view hwid);
     ~PhotonClient();
 
     bool joinRoom(std::wstring_view roomId);
@@ -79,6 +79,20 @@ private:
     ExitGames::LoadBalancing::AuthenticationValues m_authValues;
 
     std::unordered_map<std::wstring, std::wstring> m_regions;
+
+    enum class NextOperation {
+        None,
+        ConnectToNS,
+        ConnectToVRChat,
+    } m_nextOperation;
+
+    std::wstring m_userId;
+    std::wstring m_authToken;
+    std::wstring m_hwid;
+    std::wstring m_authParamsStr;
+
+    std::wstring m_selectedRegion;
+    std::wstring m_photonSecret;
 };
 }
 
