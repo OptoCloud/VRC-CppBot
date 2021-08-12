@@ -80,11 +80,13 @@ private:
 
     std::unordered_map<std::wstring, std::wstring> m_regions;
 
-    enum class NextOperation {
-        None,
-        ConnectToNS,
-        ConnectToVRChat,
-    } m_nextOperation;
+    enum class ClientConnectionState {
+        Disconnected,
+        ConnectingToNS,
+        ConnectedToNS,
+        ConnectingToMaster,
+        ConnectedToMaster,
+    } m_connectionState;
 
     std::wstring m_userId;
     std::wstring m_authToken;

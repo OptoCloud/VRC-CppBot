@@ -6,7 +6,7 @@
 #include "fmt/xchar.h"
 
 std::wstring_view VRCHAT_APPID = L"bf0942f7-9935-4192-b359-f092fa85bef1";
-std::wstring_view VRCHAT_VERSION = L"Release_2018_server_1113_2.5";
+std::wstring_view VRCHAT_VERSION = L"Release_2018_server_1121_2.5";
 std::wstring_view PHOTON_MAIN_NS = L"ns.exitgames.com";
 
 namespace PhotonLB = ExitGames::LoadBalancing;
@@ -17,20 +17,16 @@ VRChad::PhotonClient::PhotonClient(std::wstring_view userId, std::wstring_view a
     , m_photonThread()
     , m_authValues()
     , m_regions()
-    , m_nextOperation(NextOperation::ConnectToNS)
+    , m_connectionState(ClientConnectionState::Disconnected)
     , m_userId(userId)
     , m_authToken(authToken)
     , m_hwid(hwid)
 {
-    m_authParamsStr = fmt::format(L"token={}&user={}&hwid={}&platform=standalonewindows", authToken, userId, hwid);
-
-    std::wcout << "[Photon] Authenticating with params: " << m_authParamsStr << std::endl;
-
-    m_authValues.setType(ExitGames::LoadBalancing::CustomAuthenticationType::CUSTOM);
-    m_authValues.setParameters(m_authParamsStr.c_str());
-
     m_photonThread = std::thread(&VRChad::PhotonClient::photonLoop, this);
 
+    fmt::print("[Photon] Connecting to nameserver\n");
+
+    m_connectionState = ClientConnectionState::ConnectingToNS;
     connect(m_authValues, L"", PHOTON_MAIN_NS.data(), ExitGames::LoadBalancing::ServerType::NAME_SERVER);
 }
 
@@ -72,55 +68,55 @@ void VRChad::PhotonClient::onStatusChanged(int statusCode)
 
     switch (statusCode) {
     case ExitGames::Photon::StatusCode::EXCEPTION_ON_CONNECT:
-        fmt::print("PhotonClient encountered an exception while opening the incoming connection to the server. The server could be down / not running\n");
+        fmt::print("[Photon] encountered an exception while opening the incoming connection to the server. The server could be down / not running\n");
         break;
     case ExitGames::Photon::StatusCode::CONNECT:
-        fmt::print("PhotonClient connected\n");
+        fmt::print("[Photon] connected\n");
         break;
     case ExitGames::Photon::StatusCode::EXCEPTION:
-        fmt::print("PhotonClient encountered an exception and will disconnect, too\n");
+        fmt::print("[Photon] encountered an exception and will disconnect, too\n");
         break;
     case ExitGames::Photon::StatusCode::QUEUE_OUTGOING_RELIABLE_WARNING:
-        fmt::print("PhotonClient outgoing queue is filling up. send more often\n");
+        fmt::print("[Photon] outgoing queue is filling up. send more often\n");
         break;
     case ExitGames::Photon::StatusCode::QUEUE_OUTGOING_UNRELIABLE_WARNING:
-        fmt::print("PhotonClient outgoing queue is filling up. send more often\n");
+        fmt::print("[Photon] outgoing queue is filling up. send more often\n");
         break;
     case ExitGames::Photon::StatusCode::SEND_ERROR:
-        fmt::print("Sending command failed. Either not connected, or the requested channel is bigger than the number of initialized channels\n");
+        fmt::print("[Photon] Sending command failed. Either not connected, or the requested channel is bigger than the number of initialized channels\n");
         break;
     case ExitGames::Photon::StatusCode::QUEUE_OUTGOING_ACKS_WARNING:
-        fmt::print("PhotonClient outgoing queue is filling up. Send more often\n");
+        fmt::print("[Photon] outgoing queue is filling up. Send more often\n");
         break;
     case ExitGames::Photon::StatusCode::QUEUE_INCOMING_RELIABLE_WARNING:
-        fmt::print("PhotonClient incoming reliable queue is filling up. Dispatch more often\n");
+        fmt::print("[Photon] incoming reliable queue is filling up. Dispatch more often\n");
         break;
     case ExitGames::Photon::StatusCode::QUEUE_INCOMING_UNRELIABLE_WARNING:
-        fmt::print("PhotonClient incoming unreliable queue is filling up. Dispatch more often\n");
+        fmt::print("[Photon] incoming unreliable queue is filling up. Dispatch more often\n");
         break;
     case ExitGames::Photon::StatusCode::QUEUE_SENT_WARNING:
-        fmt::print("PhotonClient sent queue is filling up. Check, why the server does not acknowledge your sent reliable commands\n");
+        fmt::print("[Photon] sent queue is filling up. Check, why the server does not acknowledge your sent reliable commands\n");
         break;
     case ExitGames::Photon::StatusCode::INTERNAL_RECEIVE_EXCEPTION:
-        fmt::print("PhotonClient Exception, if a server cannot be connected. Most likely, the server is not responding. Ask the user to try again later\n");
+        fmt::print("[Photon] Exception, if a server cannot be connected. Most likely, the server is not responding. Ask the user to try again later\n");
         break;
     case ExitGames::Photon::StatusCode::TIMEOUT_DISCONNECT:
-        fmt::print("PhotonClient Disconnection due to a timeout (client did no longer receive ACKs from server)\n");
+        fmt::print("[Photon] Disconnection due to a timeout (client did no longer receive ACKs from server)\n");
         break;
     case ExitGames::Photon::StatusCode::DISCONNECT_BY_SERVER:
-        fmt::print("PhotonClient Disconnect by server due to timeout (received a disconnect command, cause server misses ACKs of client)\n");
+        fmt::print("[Photon] Disconnect by server due to timeout (received a disconnect command, cause server misses ACKs of client)\n");
         break;
     case ExitGames::Photon::StatusCode::DISCONNECT_BY_SERVER_USER_LIMIT:
-        fmt::print("PhotonClient Disconnect by server due to concurrent user limit reached (received a disconnect command)\n");
+        fmt::print("[Photon] Disconnect by server due to concurrent user limit reached (received a disconnect command)\n");
         break;
     case ExitGames::Photon::StatusCode::DISCONNECT_BY_SERVER_LOGIC:
-        fmt::print("PhotonClient Disconnect by server due to server's logic (received a disconnect command)\n");
+        fmt::print("[Photon] Disconnect by server due to server's logic (received a disconnect command)\n");
         break;
     case ExitGames::Photon::StatusCode::ENCRYPTION_ESTABLISHED:
-        fmt::print("PhotonClient Encryption success\n");
+        fmt::print("[Photon] Encryption success\n");
         break;
     case ExitGames::Photon::StatusCode::ENCRYPTION_FAILED_TO_ESTABLISH:
-        fmt::print("PhotonClient Encryption failed, Check debug logs\n");
+        fmt::print("[Photon] Encryption failed, Check debug logs\n");
         break;
     default:
         return;
@@ -196,12 +192,17 @@ void VRChad::PhotonClient::connectReturn(int errorCode, const ExitGames::Common:
 
 void VRChad::PhotonClient::disconnectReturn()
 {
-    fmt::print("PhotonClient disconnected\n");
-    if (m_nextOperation == NextOperation::ConnectToVRChat)
+    fmt::print("\n[Photon] Disconnected\n");
+    if (m_connectionState == ClientConnectionState::ConnectingToMaster)
     {
         std::wstring_view addr = m_regions[m_selectedRegion];
+        m_authParamsStr = fmt::format(L"token={}&user={}&hwid={}&platform=standalonewindows", m_authToken, m_userId, m_hwid);
 
-        fmt::print(L"Connecting to {}\n", addr);
+        fmt::print(L"[Photon] Connecting to {} with params: {}\n\n", addr, m_authParamsStr);
+
+        m_authValues.setType(ExitGames::LoadBalancing::CustomAuthenticationType::CUSTOM);
+        m_authValues.setParameters(m_authParamsStr.c_str());
+
         connect(m_authValues, L"", addr.data(), ExitGames::LoadBalancing::ServerType::MASTER_SERVER);
     }
 }
@@ -298,14 +299,18 @@ void VRChad::PhotonClient::onMasterClientChanged(int, int)
 
 void VRChad::PhotonClient::onAvailableRegions(const ExitGames::Common::JVector<ExitGames::Common::JString>& names, const ExitGames::Common::JVector<ExitGames::Common::JString>& ips)
 {
-    fmt::print("\nGot available regions:\n");
+    fmt::print("\n[Photon] Got available regions:\n");
+
+    if (m_connectionState == ClientConnectionState::ConnectingToNS) {
+        m_connectionState = ClientConnectionState::ConnectedToNS;
+    }
 
     std::wstring name;
     for (std::uint32_t i = 0; i < names.getSize(); i++) {
         name = std::wstring(names[i].cstr(), names[i].length());
         std::wstring_view ip(ips[i].cstr(), ips[i].length());
 
-        fmt::print(L"   {}:\t{}\n", name, ip);
+        fmt::print(L"\t{}:\t{}\n", name, ip);
 
         m_regions[name] = ip;
     }
@@ -321,12 +326,13 @@ void VRChad::PhotonClient::onSecretReceival(const ExitGames::Common::JString& se
 {
     m_photonSecret = std::wstring(secret.cstr(), secret.length());
 
-    fmt::print(L"\nGot secret\n", m_photonSecret);
+    fmt::print(L"\n[Photon] Got secret\n", m_photonSecret);
 
-    if (m_nextOperation == NextOperation::ConnectToNS)
+    if (m_connectionState == ClientConnectionState::ConnectedToNS)
     {
-        fmt::print(L"Disconnecting from nameserver to connect to master server\n", m_photonSecret);
-        m_nextOperation = NextOperation::ConnectToVRChat;
+        fmt::print(L"[Photon] Disconnecting from nameserver to connect to master server\n\n", m_photonSecret);
+        m_connectionState = ClientConnectionState::ConnectingToMaster;
+
         disconnect();
     }
 }
