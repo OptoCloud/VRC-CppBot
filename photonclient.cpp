@@ -5,13 +5,23 @@
 #include "fmt/core.h"
 #include "fmt/xchar.h"
 
-std::wstring_view VRCHAT_APPID = L"bf0942f7-9935-4192-b359-f092fa85bef1";
-std::wstring_view VRCHAT_VERSION = L"Release_2018_server_1121_2.5";
-std::wstring_view PHOTON_MAIN_NS = L"ns.exitgames.com";
+std::string_view VRCHAT_APPID = "bf0942f7-9935-4192-b359-f092fa85bef1";
+std::string_view VRCHAT_VERSION = "Release_2018_server_1121_2.5";
+std::string_view PHOTON_MAIN_NS = "ns.exitgames.com";
 
 namespace PhotonLB = ExitGames::LoadBalancing;
 
-VRChad::PhotonClient::PhotonClient(std::wstring_view userId, std::wstring_view authToken, std::wstring_view hwid)
+std::string utf8_encode(const ExitGames::Common::JString& wstr)
+{
+    auto utf8 = wstr.UTF8Representation();
+    return std::string(utf8.cstr(), utf8.size());
+}
+ExitGames::Common::JString utf8_decode(const std::string& str)
+{
+    return ExitGames::Common::JString(str.data());
+}
+
+VRChad::PhotonClient::PhotonClient(std::string_view userId, std::string_view authToken, std::string_view hwid)
     : PhotonLB::Client(*this, VRCHAT_APPID.data(), VRCHAT_VERSION.data(), ExitGames::Photon::ConnectionProtocol::UDP, false, PhotonLB::RegionSelectionMode::SELECT, false)
     , PhotonLB::Listener()
     , m_photonThread()
@@ -27,7 +37,7 @@ VRChad::PhotonClient::PhotonClient(std::wstring_view userId, std::wstring_view a
     fmt::print("[Photon] Connecting to nameserver\n");
 
     m_connectionState = ClientConnectionState::ConnectingToNS;
-    connect(m_authValues, L"", PHOTON_MAIN_NS.data(), ExitGames::LoadBalancing::ServerType::NAME_SERVER);
+    connect(m_authValues, L"", PHOTON_MAIN_NS.data(), PhotonLB::ServerType::NAME_SERVER);
 }
 
 VRChad::PhotonClient::~PhotonClient()
@@ -55,8 +65,9 @@ void VRChad::PhotonClient::onOperationResponse(const ExitGames::Photon::Operatio
 
     nByte opCode = operationResponse.getOperationCode();
 
+    fmt::print("[Photon] OperationResponse {}\n", opCode);
     if (opCode != 220 && opCode != 230) {
-        fmt::print("OperationResponse {}\n", opCode);
+        fmt::print("\t\thmmmmm...\n");
     }
 
     // TODO Parse parameters
@@ -127,7 +138,7 @@ void VRChad::PhotonClient::onEvent(const ExitGames::Photon::EventData& eventData
 {
     Client::onEvent(eventData); // Call base
 
-    fmt::print("VRChad::VrcPhotonClient::onEvent() {} {}\n", eventData.getCode());
+    fmt::print("VRChad::VrcPhotonClient::onEvent() {}\n", eventData.getCode());
 
     if (eventData.getCode() == 255) {
         fmt::print("User joined!\n");
@@ -137,16 +148,18 @@ void VRChad::PhotonClient::onEvent(const ExitGames::Photon::EventData& eventData
 void VRChad::PhotonClient::onPingResponse(const ExitGames::Common::JString& address, unsigned int result)
 {
     Client::onPingResponse(address, result); // Call base
-    std::wstring_view stdAddress(address.cstr(), address.length());
 
-    fmt::print(L"VRChad::VrcPhotonClient::debugReturn() {} {}\n", stdAddress, result);
+    ExitGames::Common::UTF8String addressUtf8 = address.UTF8Representation();
+    std::string_view addressUtf8View(addressUtf8.cstr(), addressUtf8.length());
+
+    fmt::print("VRChad::VrcPhotonClient::debugReturn() {} {}\n", addressUtf8View, result);
 }
 
-void VRChad::PhotonClient::debugReturn(int debugLevel, const ExitGames::Common::JString& string)
+void VRChad::PhotonClient::debugReturn(int debugLevel, const ExitGames::Common::JString& jstring)
 {
-    std::wstring_view stdString(string.cstr(), string.length());
+    std::string stdString = utf8_encode(jstring);
 
-    fmt::print(L"VRChad::VrcPhotonClient::debugReturn() {} {}\n", debugLevel, stdString);
+    fmt::print("VRChad::VrcPhotonClient::debugReturn() {} {}\n", debugLevel, stdString);
 }
 
 
@@ -170,7 +183,7 @@ void VRChad::PhotonClient::serverErrorReturn(int errorCode)
     fmt::print("VRChad::VrcPhotonClient::serverErrorReturn() {}\n", errorCode);
 }
 
-void VRChad::PhotonClient::joinRoomEventAction(int playerNr, const ExitGames::Common::JVector<int>& playernrs, const ExitGames::LoadBalancing::Player& player)
+void VRChad::PhotonClient::joinRoomEventAction(int playerNr, const ExitGames::Common::JVector<int>& playernrs, const PhotonLB::Player& player)
 {
     fmt::print("VRChad::VrcPhotonClient::joinRoomEventAction() {}\n", playerNr);
 }
@@ -195,15 +208,15 @@ void VRChad::PhotonClient::disconnectReturn()
     fmt::print("\n[Photon] Disconnected\n");
     if (m_connectionState == ClientConnectionState::ConnectingToMaster)
     {
-        std::wstring_view addr = m_regions[m_selectedRegion];
-        m_authParamsStr = fmt::format(L"token={}&user={}&hwid={}&platform=standalonewindows", m_authToken, m_userId, m_hwid);
+        std::string_view addr = m_regions[m_cloudRegion];
+        m_authParamsStr = fmt::format("token={}&user={}&hwid={}&platform=standalonewindows", m_authToken, m_userId, m_hwid);
 
-        fmt::print(L"[Photon] Connecting to {} with params: {}\n\n", addr, m_authParamsStr);
+        fmt::print("[Photon] Connecting to {} with params: {}\n\n", addr, m_authParamsStr);
 
-        m_authValues.setType(ExitGames::LoadBalancing::CustomAuthenticationType::CUSTOM);
+        m_authValues.setType(PhotonLB::CustomAuthenticationType::CUSTOM);
         m_authValues.setParameters(m_authParamsStr.c_str());
 
-        connect(m_authValues, L"", addr.data(), ExitGames::LoadBalancing::ServerType::MASTER_SERVER);
+        connect(m_authValues, L"", addr.data(), PhotonLB::ServerType::MASTER_SERVER);
     }
 }
 
@@ -252,7 +265,7 @@ void VRChad::PhotonClient::onFindFriendsResponse()
     fmt::print("VRChad::VrcPhotonClient::onFindFriendsResponse()\n");
 }
 
-void VRChad::PhotonClient::onLobbyStatsResponse(const ExitGames::Common::JVector<ExitGames::LoadBalancing::LobbyStatsResponse>&)
+void VRChad::PhotonClient::onLobbyStatsResponse(const ExitGames::Common::JVector<PhotonLB::LobbyStatsResponse>&)
 {
     fmt::print("VRChad::VrcPhotonClient::onLobbyStatsResponse()\n");
 }
@@ -282,7 +295,7 @@ void VRChad::PhotonClient::onAppStatsUpdate()
     fmt::print("VRChad::VrcPhotonClient::onAppStatsUpdate()\n");
 }
 
-void VRChad::PhotonClient::onLobbyStatsUpdate(const ExitGames::Common::JVector<ExitGames::LoadBalancing::LobbyStatsResponse>&)
+void VRChad::PhotonClient::onLobbyStatsUpdate(const ExitGames::Common::JVector<PhotonLB::LobbyStatsResponse>&)
 {
     fmt::print("VRChad::VrcPhotonClient::onLobbyStatsUpdate()\n");
 }
@@ -305,18 +318,19 @@ void VRChad::PhotonClient::onAvailableRegions(const ExitGames::Common::JVector<E
         m_connectionState = ClientConnectionState::ConnectedToNS;
     }
 
-    std::wstring name;
+    std::string ip;
+    std::string name;
     for (std::uint32_t i = 0; i < names.getSize(); i++) {
-        name = std::wstring(names[i].cstr(), names[i].length());
-        std::wstring_view ip(ips[i].cstr(), ips[i].length());
+        ip = utf8_encode(ips[i]);
+        name = utf8_encode(names[i]);
 
-        fmt::print(L"\t{}:\t{}\n", name, ip);
+        fmt::print("\t{}:\t{}\n", name, ip);
 
         m_regions[name] = ip;
     }
 
     // Set the current region to the latest one listed
-    m_selectedRegion = name;
+    m_cloudRegion = name;
 
     // Connect to the selected region
     selectRegion(name.data());
@@ -324,13 +338,13 @@ void VRChad::PhotonClient::onAvailableRegions(const ExitGames::Common::JVector<E
 
 void VRChad::PhotonClient::onSecretReceival(const ExitGames::Common::JString& secret)
 {
-    m_photonSecret = std::wstring(secret.cstr(), secret.length());
+    m_photonSecret = utf8_encode(secret);
 
-    fmt::print(L"\n[Photon] Got secret\n", m_photonSecret);
+    fmt::print("\n[Photon] Got secret: {}\n", m_photonSecret);
 
     if (m_connectionState == ClientConnectionState::ConnectedToNS)
     {
-        fmt::print(L"[Photon] Disconnecting from nameserver to connect to master server\n\n", m_photonSecret);
+        fmt::print("[Photon] Disconnecting from nameserver to connect to master server\n\n");
         m_connectionState = ClientConnectionState::ConnectingToMaster;
 
         disconnect();
@@ -357,7 +371,7 @@ void VRChad::PhotonClient::onCustomOperationResponse(const ExitGames::Photon::Op
     fmt::print("VRChad::VrcPhotonClient::onCustomOperationResponse()\n");
 }
 
-void VRChad::PhotonClient::onGetRoomListResponse(const ExitGames::Common::JVector<ExitGames::Common::Helpers::SharedPointer<ExitGames::LoadBalancing::Room>>&, const ExitGames::Common::JVector<ExitGames::Common::JString>&)
+void VRChad::PhotonClient::onGetRoomListResponse(const ExitGames::Common::JVector<ExitGames::Common::Helpers::SharedPointer<PhotonLB::Room>>&, const ExitGames::Common::JVector<ExitGames::Common::JString>&)
 {
     fmt::print("VRChad::VrcPhotonClient::onGetRoomListResponse()\n");
 }
