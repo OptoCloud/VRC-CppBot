@@ -1,6 +1,6 @@
 cmake_minimum_required (VERSION 3.5)
 
-set (project VRC-Bot)
+set (project VRCppBot)
 project (
     ${project}
     DESCRIPTION "Hehehehehe"
@@ -123,7 +123,6 @@ find_package (
         Widgets
         Multimedia
         MultimediaWidgets
-        SerialPort
         Concurrent
         Network
     REQUIRED
