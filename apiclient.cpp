@@ -35,7 +35,6 @@ VRChad::ApiClient::ApiClient(QObject* parent)
     , m_userAgent("VRC.Core.BestHTTP")
     , m_unityVersion("2018.4.20f1")
     , m_clientVersion("2021.3.1p1-1114--Release")
-    , m_apiHealthOk(false)
     , m_apiGotConfig(false)
     , m_serverName()
     , m_buildVersionTag()
@@ -74,11 +73,6 @@ void VRChad::ApiClient::login(QString authCookie)
     if (loginStatus() == LoginStatus::LoggedOut) {
         setLoginStatus(LoginStatus::LoggingIn);
         m_pendingAuth = authCookie;
-
-        if (!m_apiHealthOk) {
-            apiGetHealth();
-            return;
-        }
 
         if (!m_apiGotConfig) {
             apiGetConfig();
@@ -138,47 +132,6 @@ QNetworkRequest VRChad::ApiClient::createApiRequest(const QString& ext, HttpCont
     return req;
 }
 
-void VRChad::ApiClient::apiGetHealth()
-{
-    auto req = createApiRequest("health", HttpContentType::UrlEncoded, 0, false);
-
-    QNetworkReply* reply = m_networkManager->get(req);
-
-    connect(reply, &QNetworkReply::finished, [this, reply]() {
-        auto data = reply->readAll();
-        auto doc = QJsonDocument::fromJson(data);
-
-        if (doc.isObject()) {
-            if (doc["ok"].toBool(false)) {
-                qDebug() << "API Health OK!";
-                m_serverName = doc["serverName"].toString();
-                m_buildVersionTag = doc["buildVersionTag"].toString();
-
-                m_apiHealthOk = true;
-                if (loginStatus() == LoginStatus::LoggingIn) {
-                    if (!m_apiGotConfig) {
-                        apiGetConfig();
-                        return;
-                    }
-
-                    apiGetLogin();
-                }
-            }
-            else {
-                m_apiHealthOk = false;
-                qDebug() << "API Health is not ok!";
-            }
-        }
-        else {
-            m_apiHealthOk = false;
-            qDebug() << "Failed to parse json response!";
-            qDebug() << data;
-        }
-    });
-    connect(reply, &QNetworkReply::sslErrors, this, &VRChad::ApiClient::onSslError);
-    connect(reply, &QNetworkReply::errorOccurred, this, &VRChad::ApiClient::onNetworkError);
-}
-
 void VRChad::ApiClient::apiGetConfig()
 {
     auto req = createApiRequest("config", HttpContentType::UrlEncoded, 0, true);
@@ -191,6 +144,8 @@ void VRChad::ApiClient::apiGetConfig()
 
         if (doc.isObject()) {
             m_token_apiKey = doc["apiKey"].toString();
+            m_serverName = doc["serverName"].toString();
+            m_buildVersionTag = doc["buildVersionTag"].toString();
             m_updateRateMsMaximum = doc["updateRateMsMaximum"].toInt();
             m_updateRateMsMinimum = doc["updateRateMsMinimum"].toInt();
             m_updateRateMsNormal = doc["updateRateMsNormal"].toInt();
@@ -207,7 +162,7 @@ void VRChad::ApiClient::apiGetConfig()
             }
         }
         else {
-            m_apiHealthOk = false;
+            m_apiGotConfig = false;
             qDebug() << "Failed to parse json response!";
             qDebug() << data;
         }

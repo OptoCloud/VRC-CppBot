@@ -56,7 +56,6 @@ private:
 
     QNetworkRequest createApiRequest(const QString& ext, HttpContentType contentType, std::uint32_t contentLength, bool addQueries);
 
-    void apiGetHealth();
     void apiGetConfig();
     void apiGetLogin();
 
@@ -80,7 +79,6 @@ private:
     QString m_unityVersion;
     QString m_clientVersion;
 
-    bool m_apiHealthOk;
     bool m_apiGotConfig;
     QString m_serverName;
     QString m_buildVersionTag;
