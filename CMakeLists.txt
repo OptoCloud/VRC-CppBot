@@ -152,7 +152,7 @@ include_directories (
 
 # --- Build ---
 include_directories(
-    ${CMAKE_CURRENT_SOURCE_DIR}/external/windows
+    ${CMAKE_CURRENT_SOURCE_DIR}/external/${BUILD_OSL}
 )
 
 set (${project}_SOURCES
@@ -174,6 +174,12 @@ add_executable (${project}
     ${${project}_RESOURCES}
 )
 
+target_link_directories (${project} PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/external/${BUILD_OSL}/Photon-cpp/lib
+    ${CMAKE_CURRENT_SOURCE_DIR}/external/${BUILD_OSL}/Common-cpp/lib
+    ${CMAKE_CURRENT_SOURCE_DIR}/external/${BUILD_OSL}/LoadBalancing-cpp/lib
+)
+
 if (WIN32)
     string(TOLOWER ${CMAKE_BUILD_TYPE} LC_BUILD_TYPE)
     set (PHOTON_LIBRARIES
@@ -181,21 +187,13 @@ if (WIN32)
         Common-cpp_vc16_${LC_BUILD_TYPE}_windows_md_x64
         LoadBalancing-cpp_vc16_${LC_BUILD_TYPE}_windows_md_x64
         )
-    set (OS_STR windows)
 else ()
     set (PHOTON_LIBRARIES
         libPhoton${CMAKE_BUILD_TYPE}64
         libCommon${CMAKE_BUILD_TYPE}64
         libLoadBalancing${CMAKE_BUILD_TYPE}64
         )
-    set (OS_STR linux)
 endif ()
-
-target_link_directories (${project} PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/external/${OS_STR}/Photon-cpp/lib
-    ${CMAKE_CURRENT_SOURCE_DIR}/external/${OS_STR}/Common-cpp/lib
-    ${CMAKE_CURRENT_SOURCE_DIR}/external/${OS_STR}/LoadBalancing-cpp/lib
-)
 
 target_link_libraries (${project} PRIVATE
     ${PHOTON_LIBRARIES}
