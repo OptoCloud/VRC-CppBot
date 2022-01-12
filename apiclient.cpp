@@ -31,11 +31,14 @@ VRChad::ApiClient::ApiClient(QObject* parent)
     , m_apiPath("/api/1/")
     , m_networkManager(new QNetworkAccessManager(this))
     , m_loginStatus(LoginStatus::LoggedOut)
+    , m_pendingAuth()
     , m_hwid(genHardwareId())
     , m_userAgent("VRC.Core.BestHTTP")
     , m_unityVersion("2018.4.20f1")
-    , m_clientVersion("2021.3.1p1-1114--Release")
+    , m_clientVersion()
+    , m_photonServerName()
     , m_apiGotConfig(false)
+    , m_photonGotConfig(false)
     , m_serverName()
     , m_buildVersionTag()
     , m_token_apiKey()
@@ -45,6 +48,10 @@ VRChad::ApiClient::ApiClient(QObject* parent)
     , m_updateRateMsMinimum()
     , m_updateRateMsNormal()
     , m_updateRateMsUdonManual()
+    , m_releaseServerVersionStandalone()
+    , m_photonAuthToken()
+    , m_currentUserId()
+    , m_currentAvatarId()
 {
 }
 
@@ -68,18 +75,23 @@ QString VRChad::ApiClient::photonAuthToken() const
     return m_photonAuthToken;
 }
 
+QString VRChad::ApiClient::clientVersion() const
+{
+    return m_clientVersion;
+}
+
+QString VRChad::ApiClient::photonServerName() const
+{
+    return m_photonServerName;
+}
+
 void VRChad::ApiClient::login(QString authCookie)
 {
     if (loginStatus() == LoginStatus::LoggedOut) {
         setLoginStatus(LoginStatus::LoggingIn);
         m_pendingAuth = authCookie;
 
-        if (!m_apiGotConfig) {
-            apiGetConfig();
-            return;
-        }
-
-        apiGetLogin();
+        ensureConfigs(std::bind(&VRChad::ApiClient::apiGetLogin, this));
     }
 }
 
@@ -119,7 +131,6 @@ QNetworkRequest VRChad::ApiClient::createApiRequest(const QString& ext, HttpCont
         break;
     }
 
-
     // Set headers
     req.setHeader(QNetworkRequest::UserAgentHeader, m_userAgent.toUtf8());
     req.setHeader(QNetworkRequest::ContentTypeHeader, contentTypeStr);
@@ -132,13 +143,54 @@ QNetworkRequest VRChad::ApiClient::createApiRequest(const QString& ext, HttpCont
     return req;
 }
 
-void VRChad::ApiClient::apiGetConfig()
+void VRChad::ApiClient::ensureConfigs(std::function<void()> needsConfigs)
+{
+    if (!m_photonGotConfig) {
+        getPhotonConfig(needsConfigs);
+        return;
+    }
+    if (!m_apiGotConfig) {
+        apiGetConfig(needsConfigs);
+        return;
+    }
+    needsConfigs();
+}
+
+void VRChad::ApiClient::getPhotonConfig(std::function<void()> needsConfig)
+{
+    QNetworkReply* reply = m_networkManager->get(QNetworkRequest (QUrl("https://api.ripper.store/config")));
+    connect(reply, &QNetworkReply::finished, [this, reply, needsConfig]() {
+        auto data = reply->readAll();
+        auto doc = QJsonDocument::fromJson(data);
+
+        if (doc.isObject()) {
+            m_clientVersion = doc["x_client_version"].toString();
+            m_photonServerName = doc["photon_server"].toString();
+
+            m_photonGotConfig = true;
+            qDebug() << "Got Photon config!";
+
+            emit gotPhotonConfig();
+
+            ensureConfigs(needsConfig);
+        }
+        else {
+            m_photonGotConfig = false;
+            qDebug() << "Failed to parse photonconfig response!";
+            qDebug() << data;
+        }
+    });
+    connect(reply, &QNetworkReply::sslErrors, this, &VRChad::ApiClient::onSslError);
+    connect(reply, &QNetworkReply::errorOccurred, this, &VRChad::ApiClient::onNetworkError);
+}
+
+void VRChad::ApiClient::apiGetConfig(std::function<void()> needsConfig)
 {
     auto req = createApiRequest("config", HttpContentType::UrlEncoded, 0, true);
 
     QNetworkReply* reply = m_networkManager->get(req);
 
-    connect(reply, &QNetworkReply::finished, [this, reply]() {
+    connect(reply, &QNetworkReply::finished, [this, reply, needsConfig]() {
         auto data = reply->readAll();
         auto doc = QJsonDocument::fromJson(data);
 
@@ -157,9 +209,9 @@ void VRChad::ApiClient::apiGetConfig()
             m_apiGotConfig = true;
             qDebug() << "Got API config!";
 
-            if (loginStatus() == LoginStatus::LoggingIn) {
-                apiGetLogin();
-            }
+            emit gotApiConfig();
+
+            ensureConfigs(needsConfig);
         }
         else {
             m_apiGotConfig = false;

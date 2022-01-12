@@ -10,7 +10,7 @@ namespace VRChad {
 class PhotonClient : public ExitGames::LoadBalancing::Client, private ExitGames::LoadBalancing::Listener
 {
 public:
-    PhotonClient(std::string_view userId, std::string_view authToken, std::string_view hwid);
+    PhotonClient(std::string_view vrchatClientVersion, std::string_view userId, std::string_view authToken, std::string_view hwid);
     ~PhotonClient();
 
     bool joinRoom(std::string_view roomId);

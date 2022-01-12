@@ -41,11 +41,14 @@ public:
     QString currentUserId() const;
     QString photonAuthToken() const;
 
+    QString clientVersion() const;
+    QString photonServerName() const;
+
     void login(QString authCookie);
 signals:
-    void gotApiHealthOk();
     void gotApiConfig();
-    void loginStatusChanged(LoginStatus);
+    void gotPhotonConfig();
+    void loginStatusChanged(VRChad::ApiClient::LoginStatus);
 private:
     void setLoginStatus(LoginStatus status);
 
@@ -56,7 +59,11 @@ private:
 
     QNetworkRequest createApiRequest(const QString& ext, HttpContentType contentType, std::uint32_t contentLength, bool addQueries);
 
-    void apiGetConfig();
+    void ensureConfigs(std::function<void()> needsConfigs);
+
+    void getPhotonConfig(std::function<void()> needsConfig);
+    void apiGetConfig(std::function<void()> needsConfig);
+
     void apiGetLogin();
 
     void apiGetUserInfo(const QString& userId);
@@ -78,8 +85,10 @@ private:
     QString m_userAgent;
     QString m_unityVersion;
     QString m_clientVersion;
+    QString m_photonServerName;
 
     bool m_apiGotConfig;
+    bool m_photonGotConfig;
     QString m_serverName;
     QString m_buildVersionTag;
 

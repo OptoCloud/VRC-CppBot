@@ -13,7 +13,7 @@ int main(int argc, char** argv)
 
     QObject::connect(apiClient.get(), &VRChad::ApiClient::loginStatusChanged, [&](VRChad::ApiClient::LoginStatus loginStatus){
         if (loginStatus == VRChad::ApiClient::LoginStatus::LoggedIn) {
-            photonClient = std::make_shared<VRChad::PhotonClient>(apiClient->currentUserId().toStdString(), apiClient->photonAuthToken().toStdString(), apiClient->currentHwid().toStdString());
+            photonClient = std::make_shared<VRChad::PhotonClient>(apiClient->clientVersion().toStdString(), apiClient->currentUserId().toStdString(), apiClient->photonAuthToken().toStdString(), apiClient->currentHwid().toStdString());
 
         }
     });

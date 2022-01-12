@@ -6,7 +6,6 @@
 #include "fmt/xchar.h"
 
 std::string_view VRCHAT_APPID = "bf0942f7-9935-4192-b359-f092fa85bef1";
-std::string_view VRCHAT_VERSION = "Release_2018_server_1121_2.5";
 std::string_view PHOTON_MAIN_NS = "ns.exitgames.com";
 
 namespace PhotonLB = ExitGames::LoadBalancing;
@@ -21,8 +20,8 @@ ExitGames::Common::JString utf8_decode(const std::string& str)
     return ExitGames::Common::JString(str.data());
 }
 
-VRChad::PhotonClient::PhotonClient(std::string_view userId, std::string_view authToken, std::string_view hwid)
-    : PhotonLB::Client(*this, VRCHAT_APPID.data(), VRCHAT_VERSION.data(), ExitGames::Photon::ConnectionProtocol::UDP, false, PhotonLB::RegionSelectionMode::SELECT, false)
+VRChad::PhotonClient::PhotonClient(std::string_view vrchatClientVersion, std::string_view userId, std::string_view authToken, std::string_view hwid)
+    : PhotonLB::Client(*this, VRCHAT_APPID.data(), vrchatClientVersion.data(), ExitGames::Photon::ConnectionProtocol::UDP, false, PhotonLB::RegionSelectionMode::SELECT, false)
     , PhotonLB::Listener()
     , m_photonThread()
     , m_authValues()
