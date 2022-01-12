@@ -118,11 +118,6 @@ find_package (
     Qt5
     COMPONENTS
         Core
-        Gui
-        OpenGL
-        Widgets
-        Multimedia
-        MultimediaWidgets
         Concurrent
         Network
     REQUIRED
