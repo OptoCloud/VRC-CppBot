@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="LoadBalancing-cpp" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="debug_linux32">
+				<Option output="libLoadBalancingDebug32" prefix_auto="0" extension_auto="1" />
+				<Option working_dir="" />
+				<Option object_output="obj/Debug32" />
+				<Option type="2" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+					<Add option="-m32" />
+					<Add option="-D_DEBUG" />
+					<Add option="-D_LIB" />
+					<Add option="-D_EG_LINUX_PLATFORM" />
+					<Add option="-DEG_DEBUGGER" />
+					<Add directory=".." />
+				</Compiler>
+			</Target>
+			<Target title="release_linux32">
+				<Option output="libLoadBalancingRelease32" prefix_auto="0" extension_auto="1" />
+				<Option working_dir="" />
+				<Option object_output="obj/Release32" />
+				<Option type="2" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O3" />
+					<Add option="-m32" />
+					<Add option="-D_LIB" />
+					<Add option="-DNDEBUG" />
+					<Add option="-D_EG_LINUX_PLATFORM" />
+					<Add directory=".." />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+			<Target title="debug_linux64">
+				<Option output="libLoadBalancingDebug64" prefix_auto="0" extension_auto="1" />
+				<Option working_dir="" />
+				<Option object_output="obj/Debug64" />
+				<Option type="2" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+					<Add option="-m64" />
+					<Add option="-D_DEBUG" />
+					<Add option="-D_LIB" />
+					<Add option="-D_EG_LINUX_PLATFORM" />
+					<Add option="-DEG_DEBUGGER" />
+					<Add directory=".." />
+				</Compiler>
+			</Target>
+			<Target title="release_linux64">
+				<Option output="libLoadBalancingRelease64" prefix_auto="0" extension_auto="1" />
+				<Option working_dir="" />
+				<Option object_output="obj/Release64" />
+				<Option type="2" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O3" />
+					<Add option="-m64" />
+					<Add option="-D_LIB" />
+					<Add option="-DNDEBUG" />
+					<Add option="-D_EG_LINUX_PLATFORM" />
+					<Add directory=".." />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-std=c++11" />
+			<Add option="-fPIC" />
+		</Compiler>
+		<Unit filename="inc/AuthenticationValues.h" />
+		<Unit filename="inc/Client.h" />
+		<Unit filename="inc/ConnectOptions.h" />
+		<Unit filename="inc/Enums/CustomAuthenticationType.h" />
+		<Unit filename="inc/Enums/DisconnectCause.h" />
+		<Unit filename="inc/Enums/ErrorCode.h" />
+		<Unit filename="inc/Enums/LobbyType.h" />
+		<Unit filename="inc/Enums/MatchmakingMode.h" />
+		<Unit filename="inc/Enums/PeerStates.h" />
+		<Unit filename="inc/Enums/RegionSelectionMode.h" />
+		<Unit filename="inc/Enums/ServerType.h" />
+		<Unit filename="inc/FriendInfo.h" />
+		<Unit filename="inc/Internal/AuthenticationValuesSecretSetter.h" />
+		<Unit filename="inc/Internal/Enums/EncryptionDataParameters.h" />
+		<Unit filename="inc/Internal/Enums/EncryptionMode.h" />
+		<Unit filename="inc/Internal/Enums/EventCode.h" />
+		<Unit filename="inc/Internal/Enums/JoinMode.h" />
+		<Unit filename="inc/Internal/Enums/JoinType.h" />
+		<Unit filename="inc/Internal/Enums/OperationCode.h" />
+		<Unit filename="inc/Internal/Enums/ParameterCode.h" />
+		<Unit filename="inc/Internal/Enums/Properties/Player.h" />
+		<Unit filename="inc/Internal/Enums/Properties/Room.h" />
+		<Unit filename="inc/Internal/MutablePlayerFactory.h" />
+		<Unit filename="inc/Internal/MutableRoomFactory.h" />
+		<Unit filename="inc/Internal/PlayerFactory.h" />
+		<Unit filename="inc/Internal/PlayerMovementInformant.h" />
+		<Unit filename="inc/Internal/PlayerMutableRoomPointerSetter.h" />
+		<Unit filename="inc/Internal/PlayerPropertiesCacher.h" />
+		<Unit filename="inc/Internal/PlayerPropertiesUpdateInformant.h" />
+		<Unit filename="inc/Internal/PuncherClient.h" />
+		<Unit filename="inc/Internal/RoomFactory.h" />
+		<Unit filename="inc/Internal/RoomPropertiesCacher.h" />
+		<Unit filename="inc/Internal/Utils.h" />
+		<Unit filename="inc/Listener.h" />
+		<Unit filename="inc/LobbyStatsRequest.h" />
+		<Unit filename="inc/LobbyStatsResponse.h" />
+		<Unit filename="inc/MutablePlayer.h" />
+		<Unit filename="inc/MutableRoom.h" />
+		<Unit filename="inc/Peer.h" />
+		<Unit filename="inc/Player.h" />
+		<Unit filename="inc/RaiseEventOptions.h" />
+		<Unit filename="inc/Room.h" />
+		<Unit filename="inc/RoomOptions.h" />
+		<Unit filename="inc/SendDirectOptions.h" />
+		<Unit filename="inc/WebFlags.h" />
+		<Unit filename="src/AuthenticationValues.cpp" />
+		<Unit filename="src/Client.cpp" />
+		<Unit filename="src/ConnectOptions.cpp" />
+		<Unit filename="src/FriendInfo.cpp" />
+		<Unit filename="src/Internal/AuthenticationValuesSecretSetter.cpp" />
+		<Unit filename="src/Internal/MutablePlayerFactory.cpp" />
+		<Unit filename="src/Internal/MutableRoomFactory.cpp" />
+		<Unit filename="src/Internal/PlayerFactory.cpp" />
+		<Unit filename="src/Internal/PlayerMovementInformant.cpp" />
+		<Unit filename="src/Internal/PlayerMutableRoomPointerSetter.cpp" />
+		<Unit filename="src/Internal/PlayerPropertiesCacher.cpp" />
+		<Unit filename="src/Internal/PlayerPropertiesUpdateInformant.cpp" />
+		<Unit filename="src/Internal/PuncherClient.cpp" />
+		<Unit filename="src/Internal/RoomFactory.cpp" />
+		<Unit filename="src/Internal/RoomPropertiesCacher.cpp" />
+		<Unit filename="src/Internal/Utils.cpp" />
+		<Unit filename="src/LobbyStatsRequest.cpp" />
+		<Unit filename="src/LobbyStatsResponse.cpp" />
+		<Unit filename="src/MutablePlayer.cpp" />
+		<Unit filename="src/MutableRoom.cpp" />
+		<Unit filename="src/Peer.cpp" />
+		<Unit filename="src/Player.cpp" />
+		<Unit filename="src/RaiseEventOptions.cpp" />
+		<Unit filename="src/Room.cpp" />
+		<Unit filename="src/RoomOptions.cpp" />
+		<Unit filename="src/SendDirectOptions.cpp" />
+		<Unit filename="src/WebFlags.cpp" />
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

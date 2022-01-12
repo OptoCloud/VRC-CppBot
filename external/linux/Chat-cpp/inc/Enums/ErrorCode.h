@@ -1,5 +1,5 @@
 /* Exit Games Photon Chat - C++ Client Lib
- * Copyright (C) 2004-2020 by Exit Games GmbH. All rights reserved.
+ * Copyright (C) 2004-2021 by Exit Games GmbH. All rights reserved.
  * http://www.photonengine.com
  * mailto:developer@photonengine.com
  */
@@ -31,8 +31,7 @@ namespace ExitGames
 			static const int MAX_CCU_REACHED                    = 32757;
 			static const int INVALID_REGION                     = 32756;
 			static const int CUSTOM_AUTHENTICATION_FAILED       = 32755;
-
-		};
+		}
 		/** @file */
 	}
 }

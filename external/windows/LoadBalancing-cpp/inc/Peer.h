@@ -1,5 +1,5 @@
 /* Exit Games Photon LoadBalancing - C++ Client Lib
- * Copyright (C) 2004-2020 by Exit Games GmbH. All rights reserved.
+ * Copyright (C) 2004-2021 by Exit Games GmbH. All rights reserved.
  * http://www.photonengine.com
  * mailto:developer@photonengine.com
  */
@@ -70,42 +70,42 @@ namespace ExitGames
 		bool Peer::opRaiseEvent(bool reliable, const Ftype& parameters, nByte eventCode, const RaiseEventOptions& options)
 		{
 			COMPILE_TIME_ASSERT2_TRUE_MSG(!Common::Helpers::ConfirmAllowed<Ftype>::dimensions, ERROR_THIS_OVERLOAD_IS_ONLY_FOR_SINGLE_VALUES);
-			return opRaiseEvent(reliable, Common::Helpers::ValueToObject::get(parameters), eventCode, options);
+			return opRaiseEvent(reliable, Common::Helpers::ValueToObject<Common::Object>::get(parameters), eventCode, options);
 		}
 
 		template<typename Ftype>
 		bool Peer::opRaiseEvent(bool reliable, const Ftype pParameterArray, typename Common::Helpers::ArrayLengthType<Ftype>::type arrSize, nByte eventCode, const RaiseEventOptions& options)
 		{
 			COMPILE_TIME_ASSERT2_TRUE_MSG(Common::Helpers::ConfirmAllowed<Ftype>::dimensions==1, ERROR_THIS_OVERLOAD_IS_ONLY_FOR_1D_ARRAYS);
-			return opRaiseEvent(reliable, Common::Helpers::ValueToObject::get(pParameterArray, arrSize), eventCode, options);
+			return opRaiseEvent(reliable, Common::Helpers::ValueToObject<Common::Object>::get(pParameterArray, arrSize), eventCode, options);
 		}
 
 		template<typename Ftype>
 		bool Peer::opRaiseEvent(bool reliable, const Ftype pParameterArray, const short* pArrSizes, nByte eventCode, const RaiseEventOptions& options)
 		{
 			COMPILE_TIME_ASSERT2_TRUE_MSG((Common::Helpers::ConfirmAllowed<Ftype>::dimensions>1), ERROR_THIS_OVERLOAD_IS_ONLY_FOR_MULTIDIMENSIONAL_ARRAYS);
-			return opRaiseEvent(reliable, Common::Helpers::ValueToObject::get(pParameterArray, pArrSizes), eventCode, options);
+			return opRaiseEvent(reliable, Common::Helpers::ValueToObject<Common::Object>::get(pParameterArray, pArrSizes), eventCode, options);
 		}
 
 		template<typename Ftype>
 		bool Peer::opWebRpc(const Common::JString& uriPath, const Ftype& parameters, bool sendAuthCookie)
 		{
 			COMPILE_TIME_ASSERT2_TRUE_MSG(!Common::Helpers::ConfirmAllowed<Ftype>::dimensions, ERROR_THIS_OVERLOAD_IS_ONLY_FOR_SINGLE_VALUES);
-			return opWebRpc(uriPath, Common::Helpers::ValueToObject::get(parameters), sendAuthCookie);
+			return opWebRpc(uriPath, Common::Helpers::ValueToObject<Common::Object>::get(parameters), sendAuthCookie);
 		}
 
 		template<typename Ftype>
 		bool Peer::opWebRpc(const Common::JString& uriPath, const Ftype pParameterArray, typename Common::Helpers::ArrayLengthType<Ftype>::type arrSize, bool sendAuthCookie)
 		{
 			COMPILE_TIME_ASSERT2_TRUE_MSG(Common::Helpers::ConfirmAllowed<Ftype>::dimensions==1, ERROR_THIS_OVERLOAD_IS_ONLY_FOR_1D_ARRAYS);
-			return opWebRpc(uriPath, Common::Helpers::ValueToObject::get(pParameterArray, arrSize), sendAuthCookie);
+			return opWebRpc(uriPath, Common::Helpers::ValueToObject<Common::Object>::get(pParameterArray, arrSize), sendAuthCookie);
 		}
 
 		template<typename Ftype>
 		bool Peer::opWebRpc(const Common::JString& uriPath, const Ftype pParameterArray, const short* pArrSizes, bool sendAuthCookie)
 		{
 			COMPILE_TIME_ASSERT2_TRUE_MSG((Common::Helpers::ConfirmAllowed<Ftype>::dimensions>1), ERROR_THIS_OVERLOAD_IS_ONLY_FOR_MULTIDIMENSIONAL_ARRAYS);
-			return opWebRpc(uriPath, Common::Helpers::ValueToObject::get(pParameterArray, pArrSizes), sendAuthCookie);
+			return opWebRpc(uriPath, Common::Helpers::ValueToObject<Common::Object>::get(pParameterArray, pArrSizes), sendAuthCookie);
 		}
 	}
 }

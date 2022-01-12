@@ -1,5 +1,5 @@
 /* Exit Games Common - C++ Client Lib
- * Copyright (C) 2004-2020 by Exit Games GmbH. All rights reserved.
+ * Copyright (C) 2004-2021 by Exit Games GmbH. All rights reserved.
  * http://www.photonengine.com
  * mailto:developer@photonengine.com
  */
@@ -7,6 +7,8 @@
 #pragma once
 
 #include "Common-cpp/inc/Helpers/SmartPointers/SmartPointerBase.h"
+#include "Common-cpp/inc/Helpers/TypeTraits/EnableIf.h"
+#include "Common-cpp/inc/Helpers/TypeTraits/IsDerivedFrom.h"
 
 namespace ExitGames
 {
@@ -31,10 +33,11 @@ namespace ExitGames
 				SmartPointerInterface(Etype* pData, void (*pDeleter)(const Etype*));
 				virtual ~SmartPointerInterface(void) = 0;
 
-				SmartPointerInterface(const SmartPointerInterface<Etype>& toCopy);
+				template<typename Ftype> SmartPointerInterface(const SmartPointerInterface<Ftype>& toCopy, const SmartPointerInterface<typename EnableIf<IsDerivedFrom<Ftype, Etype>::is, Ftype>::type>* pDummyDeducer=NULL);
 
 				Etype* mpData;
-				void (*mpDeleter)(const Etype*);
+				typedef void (*Deleter)(const Etype*);
+				Deleter mpDeleter;
 			private:
 				SmartPointerInterface& operator=(const SmartPointerInterface<Etype>& toCopy);
 			};
@@ -61,7 +64,8 @@ namespace ExitGames
 			}
 
 			template<typename Etype>
-			SmartPointerInterface<Etype>::SmartPointerInterface(const SmartPointerInterface<Etype>& toCopy)
+			template<typename Ftype>
+			SmartPointerInterface<Etype>::SmartPointerInterface(const SmartPointerInterface<Ftype>& /*toCopy*/, const SmartPointerInterface<typename EnableIf<IsDerivedFrom<Ftype, Etype>::is, Ftype>::type>* /*pDummyDeducer*/)
 			{
 			}
 

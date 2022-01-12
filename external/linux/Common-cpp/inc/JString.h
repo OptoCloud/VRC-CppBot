@@ -1,5 +1,5 @@
 /* Exit Games Common - C++ Client Lib
- * Copyright (C) 2004-2020 by Exit Games GmbH. All rights reserved.
+ * Copyright (C) 2004-2021 by Exit Games GmbH. All rights reserved.
  * http://www.photonengine.com
  * mailto:developer@photonengine.com
  */
@@ -106,7 +106,7 @@ namespace ExitGames
 			JString trim(void);
 			UTF8String UTF8Representation(void) const;
 			ANSIString ANSIRepresentation(void) const;
-			JString& toString(JString& retStr, bool withTypes=false) const;
+			virtual JString& toString(JString& retStr, bool withTypes=false) const;
 		private:
 			void GetBuffer(unsigned int MaxStrLen);
 			void verifyIndex(unsigned int number) const;

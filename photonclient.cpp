@@ -37,7 +37,13 @@ VRChad::PhotonClient::PhotonClient(std::string_view userId, std::string_view aut
     fmt::print("[Photon] Connecting to nameserver\n");
 
     m_connectionState = ClientConnectionState::ConnectingToNS;
-    connect(m_authValues, L"", PHOTON_MAIN_NS.data(), PhotonLB::ServerType::NAME_SERVER);
+
+    ExitGames::LoadBalancing::ConnectOptions connectOptions;
+    connectOptions.setAuthenticationValues(m_authValues);
+    connectOptions.setServerAddress(PHOTON_MAIN_NS.data());
+    connectOptions.setServerType(PhotonLB::ServerType::NAME_SERVER);
+
+    connect(connectOptions);
 }
 
 VRChad::PhotonClient::~PhotonClient()
@@ -216,7 +222,12 @@ void VRChad::PhotonClient::disconnectReturn()
         m_authValues.setType(PhotonLB::CustomAuthenticationType::CUSTOM);
         m_authValues.setParameters(m_authParamsStr.c_str());
 
-        connect(m_authValues, L"", addr.data(), PhotonLB::ServerType::MASTER_SERVER);
+        ExitGames::LoadBalancing::ConnectOptions connectOptions;
+        connectOptions.setAuthenticationValues(m_authValues);
+        connectOptions.setServerAddress(addr.data());
+        connectOptions.setServerType(PhotonLB::ServerType::MASTER_SERVER);
+
+        connect(connectOptions);
     }
 }
 
@@ -312,17 +323,15 @@ void VRChad::PhotonClient::onMasterClientChanged(int, int)
 
 void VRChad::PhotonClient::onAvailableRegions(const ExitGames::Common::JVector<ExitGames::Common::JString>& names, const ExitGames::Common::JVector<ExitGames::Common::JString>& ips)
 {
-    fmt::print("\n[Photon] Got available regions:\n");
+    fmt::print("[Photon] Got available regions:\n");
 
     if (m_connectionState == ClientConnectionState::ConnectingToNS) {
         m_connectionState = ClientConnectionState::ConnectedToNS;
     }
 
-    std::string ip;
-    std::string name;
     for (std::uint32_t i = 0; i < names.getSize(); i++) {
-        ip = utf8_encode(ips[i]);
-        name = utf8_encode(names[i]);
+        std::string ip = utf8_encode(ips[i]);
+        std::string name = utf8_encode(names[i]);
 
         fmt::print("\t{}:\t{}\n", name, ip);
 
@@ -330,10 +339,10 @@ void VRChad::PhotonClient::onAvailableRegions(const ExitGames::Common::JVector<E
     }
 
     // Set the current region to the latest one listed
-    m_cloudRegion = name;
+    m_cloudRegion = m_regions["usw"];
 
     // Connect to the selected region
-    selectRegion(name.data());
+    selectRegion(m_cloudRegion.data());
 }
 
 void VRChad::PhotonClient::onSecretReceival(const ExitGames::Common::JString& secret)

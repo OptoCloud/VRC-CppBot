@@ -1,5 +1,5 @@
 /* Exit Games Common - C++ Client Lib
- * Copyright (C) 2004-2020 by Exit Games GmbH. All rights reserved.
+ * Copyright (C) 2004-2021 by Exit Games GmbH. All rights reserved.
  * http://www.photonengine.com
  * mailto:developer@photonengine.com
  */
@@ -13,6 +13,14 @@ namespace ExitGames
 	namespace Common
 	{
 		class JString;
+
+		namespace Helpers
+		{
+			namespace TypeName
+			{
+				JString cut(const char* rawTypeName);
+			}
+		}
 
 		class ToString
 		{
@@ -37,6 +45,8 @@ namespace ExitGames
 			static const EG_CHAR* EG_STR_DOUBLE;
 			static const EG_CHAR* EG_STR_LONGDOUBLE;
 			static const EG_CHAR* EG_STR_BOOL;
+		private:
+			friend JString Helpers::TypeName::cut(const char* rawTypeName);
 		};
 	}
 }

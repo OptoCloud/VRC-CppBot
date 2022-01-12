@@ -1,5 +1,5 @@
 /* Exit Games Photon LoadBalancing - C++ Client Lib
- * Copyright (C) 2004-2020 by Exit Games GmbH. All rights reserved.
+ * Copyright (C) 2004-2021 by Exit Games GmbH. All rights reserved.
  * http://www.photonengine.com
  * mailto:developer@photonengine.com
  */
@@ -12,10 +12,10 @@ namespace ExitGames
 {
 	namespace LoadBalancing
 	{
-		class WebFlags : public Common::Base
+		class WebFlags : public Common::ToString
 		{
 		public:
-			using Common::ToString::toString;
+			using ToString::toString;
 
 			WebFlags(nByte webFlags=0);
 

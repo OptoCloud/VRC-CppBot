@@ -1,5 +1,5 @@
 /* Exit Games Common - C++ Client Lib
- * Copyright (C) 2004-2020 by Exit Games GmbH. All rights reserved.
+ * Copyright (C) 2004-2021 by Exit Games GmbH. All rights reserved.
  * http://www.photonengine.com
  * mailto:developer@photonengine.com
  */
@@ -24,7 +24,7 @@ namespace ExitGames
 			template<typename T> bool push(const T pData, typename Helpers::ArrayLengthType<T>::type arraySize);
 			template<typename T> bool push(const T pData, const short* arraySizes);
 
-			JString& toString(JString& retStr, bool withTypes=false) const;
+			virtual JString& toString(JString& retStr, bool withTypes=false) const;
 		private:
 			Helpers::SerializerImplementation mImp;
 		};
@@ -41,7 +41,7 @@ namespace ExitGames
 		{
 			typename Helpers::ConfirmAllowed<T>::type forceCompilationToFailForUnsupportedTypes; (void)forceCompilationToFailForUnsupportedTypes;
 			COMPILE_TIME_ASSERT2_TRUE_MSG(!Helpers::ConfirmAllowed<typename Helpers::ConfirmAllowed<T>::type>::dimensions, ERROR_THIS_OVERLOAD_IS_ONLY_FOR_SINGLE_VALUES);
-			Object obj = Helpers::ValueToObject::get(data);
+			Object obj = Helpers::ValueToObject<Object>::get(data);
 			return mImp.pushObject(&obj, true);
 		}
 		
@@ -56,7 +56,7 @@ namespace ExitGames
 		{
 			typename Helpers::ConfirmAllowed<T>::type forceCompilationToFailForUnsupportedTypes; (void)forceCompilationToFailForUnsupportedTypes;
 			COMPILE_TIME_ASSERT2_TRUE_MSG(Helpers::ConfirmAllowed<typename Helpers::ConfirmAllowed<T>::type>::dimensions==1, ERROR_THIS_OVERLOAD_IS_ONLY_FOR_1D_ARRAYS);
-			Object obj = Helpers::ValueToObject::get(pData, arraySize);
+			Object obj = Helpers::ValueToObject<Object>::get(pData, arraySize);
 			return mImp.pushObject(&obj, true);
 		}
 		
@@ -73,7 +73,7 @@ namespace ExitGames
 		{
 			typename Helpers::ConfirmAllowed<T>::type forceCompilationToFailForUnsupportedTypes; (void)forceCompilationToFailForUnsupportedTypes;
 			COMPILE_TIME_ASSERT2_TRUE_MSG((bool)Helpers::ConfirmAllowed<typename Helpers::ConfirmAllowed<T>::type>::dimensions, ERROR_THIS_OVERLOAD_IS_ONLY_FOR_FOR_ARRAYS);
-			Object obj = Helpers::ValueToObject::get(pData, arraySizes);
+			Object obj = Helpers::ValueToObject<Object>::get(pData, arraySizes);
 			return mImp.pushObject(&obj, true);
 		}
 	}

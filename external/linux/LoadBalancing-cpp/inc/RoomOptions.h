@@ -1,10 +1,11 @@
 /* Exit Games Photon LoadBalancing - C++ Client Lib
- * Copyright (C) 2004-2020 by Exit Games GmbH. All rights reserved.
+ * Copyright (C) 2004-2021 by Exit Games GmbH. All rights reserved.
  * http://www.photonengine.com
  * mailto:developer@photonengine.com
  */
 
 #pragma once
+
 #include "LoadBalancing-cpp/inc/Enums/DirectMode.h"
 #include "LoadBalancing-cpp/inc/Enums/LobbyType.h"
 
@@ -12,10 +13,10 @@ namespace ExitGames
 {
 	namespace LoadBalancing
 	{
-		class RoomOptions : public Common::Base
+		class RoomOptions : public Common::ToString
 		{
 		public:
-			using Common::ToString::toString;
+			using ToString::toString;
 
 			RoomOptions(bool isVisible=true, bool isOpen=true, nByte maxPlayers=0, const Common::Hashtable& customRoomProperties=Common::Hashtable(), const Common::JVector<Common::JString>& propsListedInLobby=Common::JVector<Common::JString>(), const Common::JString& lobbyName=Common::JString(), nByte lobbyType=LobbyType::DEFAULT, int playerTtl=0, int emptyRoomTtl=0, bool suppressRoomEvents=false, const Common::JVector<Common::JString>* pPlugins=NULL, bool publishUserID=false, nByte directMode=DirectMode::NONE);
 			~RoomOptions(void);

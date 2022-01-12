@@ -1,5 +1,5 @@
 /* Exit Games Photon - C++ Client Lib
- * Copyright (C) 2004-2020 by Exit Games GmbH. All rights reserved.
+ * Copyright (C) 2004-2021 by Exit Games GmbH. All rights reserved.
  * http://www.photonengine.com
  * mailto:developer@photonengine.com
  */
@@ -12,10 +12,10 @@ namespace ExitGames
 {
 	namespace Photon
 	{
-		class TrafficStatsGameLevel : public Common::Base
+		class TrafficStatsGameLevel : public Common::ToString
 		{
 		public:
-			using Common::ToString::toString;
+			using ToString::toString;
 
 			virtual ~TrafficStatsGameLevel(void);
 
@@ -56,7 +56,7 @@ namespace ExitGames
 			int mEventCount;
 			int mLongestOpResponseCallback;
 			nByte mLongestOpResponseCallbackOpCode;
-			int mLongestEventCallback;;
+			int mLongestEventCallback;
 			nByte mLongestEventCallbackCode;
 			int mLongestDeltaBetweenDispatching;
 			int mLongestDeltaBetweenSending;

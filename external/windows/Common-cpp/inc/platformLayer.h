@@ -1,5 +1,5 @@
 /* Exit Games Common - C++ Client Lib
- * Copyright (C) 2004-2020 by Exit Games GmbH. All rights reserved.
+ * Copyright (C) 2004-2021 by Exit Games GmbH. All rights reserved.
  * http://www.photonengine.com
  * mailto:developer@photonengine.com
  */
@@ -9,8 +9,6 @@
 #include "Common-cpp/inc/defines.h"
 
 #ifdef _EG_UNIX_PLATFORM
-
-	int getTimeUnix(void);
 
 #	ifdef _EG_ANDROID_PLATFORM
 		size_t EG_wcslen(const EG_CHAR* wcs);

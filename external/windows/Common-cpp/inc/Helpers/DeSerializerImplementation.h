@@ -1,12 +1,12 @@
 /* Exit Games Common - C++ Client Lib
- * Copyright (C) 2004-2020 by Exit Games GmbH. All rights reserved.
+ * Copyright (C) 2004-2021 by Exit Games GmbH. All rights reserved.
  * http://www.photonengine.com
  * mailto:developer@photonengine.com
  */
 
 #pragma once
 
-#include "Common-cpp/inc/Hashtable.h"
+#include "Common-cpp/inc/Containers/Hashtable.h"
 
 namespace ExitGames
 {
@@ -46,17 +46,17 @@ namespace ExitGames
 				double readDouble(void);
 				bool readBoolean(void);
 
-				JString& toString(JString& retStr, bool withTypes=false) const;
+				virtual JString& toString(JString& retStr, bool withTypes=false) const;
 			protected:
 				void popStringHelper(JString& str);
 				void popHashTableHelper(Hashtable& hash);
 				void popArrayOfDictionaries(Object& dict, short arraySize, int dimensions=0);
-				const DictionaryBase* popDictionaryHelper(nByte* pKeyTypes, nByte* pValueTypes, unsigned int* pDimensionsOfNestedValues);
+				const DictionaryBase* popDictionaryHelper(nByte* pKeyTypes, nByte* pValueTypes, unsigned int* pDimensionsOfNestedValues, nByte customType);
 				void popCustomHelper(Object& object, nByte customType, short arraySize, int dimensions=0);
 				void popArray(Object& array); 
 				void popObjectArray(Object& array);
 
-				void readDictionaryTypes(nByte** ppKeyTypes, nByte** ppValTypes, unsigned int** ppDimensionsOfNestedValues);
+				void readDictionaryTypes(nByte** ppKeyTypes, nByte** ppValTypes, unsigned int** ppDimensionsOfNestedValues, nByte* pCustomType);
 			private:
 				int mDataOffset;
 				nByte* mpData;

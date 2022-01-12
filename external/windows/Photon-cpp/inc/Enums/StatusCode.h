@@ -1,5 +1,5 @@
 /* Exit Games Photon - C++ Client Lib
- * Copyright (C) 2004-2020 by Exit Games GmbH. All rights reserved.
+ * Copyright (C) 2004-2021 by Exit Games GmbH. All rights reserved.
  * http://www.photonengine.com
  * mailto:developer@photonengine.com
  */
@@ -16,8 +16,8 @@ namespace ExitGames
 			static const int CONNECT                           = 1024; ///<the PhotonPeer is connected.
 			static const int DISCONNECT                        = 1025; ///<the PhotonPeer just disconnected.
 			static const int EXCEPTION                         = 1026; ///<the PhotonPeer encountered an exception and will disconnect, too.
-			static const int QUEUE_OUTGOING_RELIABLE_WARNING   = 1027; ///<PhotonPeer outgoing queue is filling up. send more often.
-			static const int QUEUE_OUTGOING_UNRELIABLE_WARNING = 1029; ///<PhotonPeer outgoing queue is filling up. send more often.
+			static const int QUEUE_OUTGOING_RELIABLE_WARNING   = 1027; ///<PhotonPeer outgoing queue is filling up. Send more often.
+			static const int QUEUE_OUTGOING_UNRELIABLE_WARNING = 1029; ///<PhotonPeer outgoing queue is filling up. Send more often.
 			static const int SEND_ERROR                        = 1030; ///<Sending command failed. Either not connected, or the requested channel is bigger than the number of initialized channels.
 			static const int QUEUE_OUTGOING_ACKS_WARNING       = 1031; ///<PhotonPeer outgoing queue is filling up. Send more often.
 			static const int QUEUE_INCOMING_RELIABLE_WARNING   = 1033; ///<PhotonPeer incoming reliable queue is filling up. Dispatch more often.

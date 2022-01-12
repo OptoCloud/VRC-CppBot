@@ -1,5 +1,5 @@
 /* Exit Games Common - C++ Client Lib
- * Copyright (C) 2004-2020 by Exit Games GmbH. All rights reserved.
+ * Copyright (C) 2004-2021 by Exit Games GmbH. All rights reserved.
  * http://www.photonengine.com
  * mailto:developer@photonengine.com
  */
@@ -38,7 +38,7 @@ namespace ExitGames
 			public:
 				static char* Unicode2ANSI(const EG_CHAR* wstr, char* str, unsigned int strSize);
 				static EG_CHAR* ANSI2Unicode(const char* str, EG_CHAR* wstr, unsigned int wstrLen);
-#ifdef _EG_PS4_PLATFORM
+#ifdef _EG_PS4_OR_NEWER_PLATFORM
 			private:
 				static bool mInitialized;
 #endif

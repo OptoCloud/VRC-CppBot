@@ -1,5 +1,5 @@
 /* Exit Games Common - C++ Client Lib
- * Copyright (C) 2004-2020 by Exit Games GmbH. All rights reserved.
+ * Copyright (C) 2004-2021 by Exit Games GmbH. All rights reserved.
  * http://www.photonengine.com
  * mailto:developer@photonengine.com
  */
@@ -14,7 +14,7 @@
 #endif
 
 // msvc rtti || gcc rtti || gcc version from a time, when it hasn't offered an rtti define ( == llvm gcc frontend for Marmalade OS X x86 builds!)
-#if defined _CPPRTTI || defined __GXX_RTTI || !defined __clang__ && !defined _EG_PS4_PLATFORM && !defined _EG_PSVITA_PLATFORM && defined __GNUC__ && (__GNUC__ < 4 || __GNUC__ == 4 && (__GNUC_MINOR__ < 3 || __GNUC_MINOR__ == 3 && __GNUC_PATCHLEVEL__ < 2))
+#if defined _CPPRTTI || defined __GXX_RTTI || !defined __clang__ && !defined _EG_PSVITA_OR_NEWER_PLATFORM && defined __GNUC__ && (__GNUC__ < 4 || __GNUC__ == 4 && (__GNUC_MINOR__ < 3 || __GNUC_MINOR__ == 3 && __GNUC_PATCHLEVEL__ < 2))
 #	include <typeinfo>
 #	define TYPENAME(arg) cut((typeid(arg).name()))
 // else assume rtti to be disabled
@@ -24,7 +24,7 @@
 
 #include "Common-cpp/inc/JString.h"
 
-#if !defined _EG_WINDOWS_PLATFORM && !defined _EG_MARMALADE_PLATFORM && !defined _EG_ANDROID_PLATFORM && !defined _EG_BLACKBERRY_PLATFORM && !defined _EG_PS3_PLATFORM && !defined _EG_PS4_PLATFORM && !defined _EG_WINDOWSSTORE_PLATFORM && !defined _EG_EMSCRIPTEN_PLATFORM && !defined _EG_XB1_PLATFORM && !defined _EG_PSVITA_PLATFORM && !defined _EG_SWITCH_WINDOWS_PLATFORM
+#if !defined _EG_MICROSOFT_PLATFORM && !defined _EG_MARMALADE_PLATFORM && !defined _EG_ANDROID_PLATFORM && !defined _EG_BLACKBERRY_PLATFORM && !defined _EG_SONY_PLATFORM && !defined _EG_EMSCRIPTEN_PLATFORM && !defined _EG_SWITCH_WINDOWS_PLATFORM
 #	include <cxxabi.h>
 #elif defined _EG_MARMALADE_PLATFORM && (defined __GNUC__ && !defined I3D_ARCH_MIPS && !defined S3E_ANDROID_X86) || defined _EG_BLACKBERRY_PLATFORM
 	namespace abi

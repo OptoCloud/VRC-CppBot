@@ -1,5 +1,5 @@
 /* Exit Games Common - C++ Client Lib
- * Copyright (C) 2004-2020 by Exit Games GmbH. All rights reserved.
+ * Copyright (C) 2004-2021 by Exit Games GmbH. All rights reserved.
  * http://www.photonengine.com
  * mailto:developer@photonengine.com
  */
@@ -7,7 +7,7 @@
 #pragma once
 
 #include "Common-cpp/inc/defines.h"
-#if defined _EG_APPLE_PLATFORM || defined _EG_PS3_PLATFORM || defined _EG_PS4_PLATFORM || defined _EG_PSVITA_PLATFORM
+#if defined _EG_APPLE_PLATFORM || defined _EG_SONY_PLATFORM
 #	include <stdlib.h>
 #else
 #	include <malloc.h>

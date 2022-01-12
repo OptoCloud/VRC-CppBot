@@ -28,9 +28,9 @@ namespace ExitGames
 			static const nByte ARRAY              = 'y'; ///<internal only
 			static const nByte BYTEARRAY          = 'x'; ///<internal only
 			static const nByte PHOTON_COMMAND     = 'p'; ///<internal only@internal used for photon commands
-			static const nByte EG_NULL            = '*'; ///<internal only@internal for adding NULL as a value to a HashTable
-			static const nByte CUSTOM             = 'c'; ///<internal only@internal for custom data, (de-)serialized by callbacks, implemented by the application
-			static const nByte UNKNOWN            = 0  ; ///<internal only@internal used instead of OBJECT for values inside an Dictionary
+			static const nByte EG_NULL            = '*'; ///<<@if CPP an empty Object@endif @if OBJC nil@endif
+			static const nByte CUSTOM             = 'c'; ///<a subclass of class @if CPP CustomType@endif @if OBJC EGCustomType@endif - check the value of @if CPP getCustomType()@endif @if OBJC CustomType@endif to find out the exact custom type
+			static const nByte UNKNOWN            = 0  ; ///<internal only@internal used instead of OBJECT for values inside a Dictionary
 		}
 		/** @file */
 	}

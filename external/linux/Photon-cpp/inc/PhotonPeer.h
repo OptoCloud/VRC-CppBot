@@ -1,5 +1,5 @@
 /* Exit Games Photon - C++ Client Lib
- * Copyright (C) 2004-2020 by Exit Games GmbH. All rights reserved.
+ * Copyright (C) 2004-2021 by Exit Games GmbH. All rights reserved.
  * http://www.photonengine.com
  * mailto:developer@photonengine.com
  */
@@ -17,9 +17,13 @@
 #include "Photon-cpp/inc/Enums/PeerState.h"
 #include "Photon-cpp/inc/Enums/StatusCode.h"
 
-#if defined _EG_WINDOWS_PLATFORM || defined _EG_WINDOWSSTORE_PLATFORM && _MSC_VER >= 1900 || defined _EG_XB1_PLATFORM || defined EG_DOC
+#if (defined _EG_MICROSOFT_PLATFORM && !(defined _EG_WINDOWSSTORE_PLATFORM && _MSC_VER < 1900)) || (defined _EG_APPLE_PLATFORM && !defined _EG_TVOS_PLATFORM && !defined _EG_IPHONE_MACCATALYST_PLATFORM) || defined _EG_ANDROID_PLATFORM || defined EG_DOC
 #	define _EG_ENCRYPTOR_AVAILABLE
+#	if defined _EG_ANDROID_PLATFORM || defined _EG_APPLE_PLATFORM // || defined _EG_WINDOWS_PLATFORM 
+#		define _EG_ENCRYPTOR_OPENSSL
+#	endif
 #endif
+#define EG_CHAINING_MODE_CBC_GCM(CBC, GCM) GCM
 
 class EGObjCPhotonPeer;
 
@@ -63,7 +67,7 @@ namespace ExitGames
 #endif
 			virtual void initUserDataEncryption(const Common::JVector<nByte>& secret);
 #if defined _EG_ENCRYPTOR_AVAILABLE
-			virtual void initUDPEncryption(const Common::JVector<nByte>& encryptSecret, const Common::JVector<nByte>& HMACSecret);
+			virtual void initUDPEncryption(const Common::JVector<nByte>& encryptSecret, const Common::JVector<nByte>& HMACSecret=Common::JVector<nByte>());
 #endif
 
 			PhotonListener* getListener(void);
@@ -124,7 +128,7 @@ namespace ExitGames
 			void createPeerBase(void);
 
 			Common::Helpers::UniquePointer<Internal::PeerData> mupPeerData;
-			Common::Helpers::SharedPointer<Internal::PeerBase> mspPeerBase;
+			Internal::PeerBase* mpPeerBase;
 			nByte mConnectionProtocol;
 
 			friend class Internal::PeerData;
@@ -138,31 +142,31 @@ namespace ExitGames
 		
 			/**
 			   @overload
-			   @param ipAddr  Null terminated string containing IP address or domain name and optionally a port of server to connect. Should be in usual format\:  "address[\:port]",
-			   for example\: "192.168.0.1\:5055" or "udp.gameserver.com". If no port is given, port 5055  will be used by default.
-			   @param appID the appID (default\: an empty string)
+			   @param ipAddr A Null terminated string containing the IP address or domain name and optionally a port of the server to connect to. Should be in the usual format:  "address[:port]",
+			   for example: "192.168.0.1:5055" or "udp.gameserver.com". If no port is given, port 5055  will be used by default.
+			   @param appID the appID (default: an empty string)
 			   @param customData custom data to send to the server when initializing the connection - has to be provided in the form of one of the supported data types, specified at @link Datatypes Table of Datatypes\endlink*/
 			template<typename Ftype>
 			bool PhotonPeer::connect(const Common::JString& ipAddr, const Common::JString& appID, const Ftype& customData)
 			{
 				COMPILE_TIME_ASSERT2_TRUE_MSG(!Common::Helpers::ConfirmAllowed<Ftype>::dimensions, ERROR_THIS_OVERLOAD_IS_ONLY_FOR_SINGLE_VALUES);
-				return connect(ipAddr, appID, Common::Helpers::ValueToObject::get(customData));
+				return connect(ipAddr, appID, Common::Helpers::ValueToObject<Common::Object>::get(customData));
 			}
 
 			/**
 			   @overload
 			   @details
 			   This overload accepts singledimensional arrays and NULL-pointers passed for parameter pCustomDataArray. NULL pointers are only legal input, if arrSize is 0
-			   @param ipAddr  Null terminated string containing IP address or domain name and optionally a port of server to connect. Should be in usual format\:  "address[\:port]",
-			   for example\: "192.168.0.1\:5055" or "udp.gameserver.com". If no port is given, port 5055  will be used by default.
-			   @param appID the appID (default\: an empty string)
+			   @param ipAddr  Null terminated string containing IP address or domain name and optionally a port of server to connect. Should be in usual format:  "address[:port]",
+			   for example: "192.168.0.1:5055" or "udp.gameserver.com". If no port is given, port 5055  will be used by default.
+			   @param appID the appID (default: an empty string)
 			   @param pCustomDataArray custom data to send to the server when initializing the connection - has to be provided in the form of a 1D array of one of the supported data types, specified at @link Datatypes Table of Datatypes\endlink
 			   @param arrSize the element count of the customData array */
 			template<typename Ftype>
 			bool PhotonPeer::connect(const Common::JString& ipAddr, const Common::JString& appID, const Ftype pCustomDataArray, typename Common::Helpers::ArrayLengthType<Ftype>::type arrSize)
 			{
 				COMPILE_TIME_ASSERT2_TRUE_MSG(Common::Helpers::ConfirmAllowed<Ftype>::dimensions==1, ERROR_THIS_OVERLOAD_IS_ONLY_FOR_1D_ARRAYS);
-				return connect(ipAddr, appID, Common::Helpers::ValueToObject::get(pCustomDataArray, arrSize));
+				return connect(ipAddr, appID, Common::Helpers::ValueToObject<Common::Object>::get(pCustomDataArray, arrSize));
 			}
 
 			/**
@@ -173,16 +177,16 @@ namespace ExitGames
 			   a singledimensional array, a doublepointer for a twodimensional array, a triplepointer for a threedimensional array and so on.
 			   For pCustomDataArray NULL pointers are only legal input, if pArrSizes[0] is 0.
 			   For pArrSizes NULL is no valid input.
-			   @param ipAddr  Null terminated string containing IP address or domain name and optionally a port of server to connect. Should be in usual format\:  "address[\:port]",
-			   for example\: "192.168.0.1\:5055" or "udp.gameserver.com". If no port is given, port 5055  will be used by default.
-			   @param appID the appID (default\: an empty string)
+			   @param ipAddr  Null terminated string containing IP address or domain name and optionally a port of server to connect. Should be in usual format:  "address[:port]",
+			   for example: "192.168.0.1:5055" or "udp.gameserver.com". If no port is given, port 5055  will be used by default.
+			   @param appID the appID (default: an empty string)
 			   @param pCustomDataArray custom data to send to the server when initializing the connection - has to be provided in the form of an array of one of the supported data types, specified at @link Datatypes Table of Datatypes\endlink
 			   @param pArrSizes the element counts for every dimension of the custom data array - the element count of this array has to match the dimensions of the custom data array */
 			template<typename Ftype>
 			bool PhotonPeer::connect(const Common::JString& ipAddr, const Common::JString& appID, const Ftype pCustomDataArray, const short* pArrSizes)
 			{
 				COMPILE_TIME_ASSERT2_TRUE_MSG((Common::Helpers::ConfirmAllowed<Ftype>::dimensions>1), ERROR_THIS_OVERLOAD_IS_ONLY_FOR_MULTIDIMENSIONAL_ARRAYS);
-				return connect(ipAddr, appID, Common::Helpers::ValueToObject::get(pCustomDataArray, pArrSizes));
+				return connect(ipAddr, appID, Common::Helpers::ValueToObject<Common::Object>::get(pCustomDataArray, pArrSizes));
 			}
 	}
 }

@@ -1,12 +1,12 @@
 /* Exit Games Common - C++ Client Lib
- * Copyright (C) 2004-2020 by Exit Games GmbH. All rights reserved.
+ * Copyright (C) 2004-2021 by Exit Games GmbH. All rights reserved.
  * http://www.photonengine.com
  * mailto:developer@photonengine.com
  */
 
 #pragma once
 
-#include "Common-cpp/inc/DictionaryBase.h"
+#include "Common-cpp/inc/Containers/DictionaryBase.h"
 #include "Common-cpp/inc/UTF8String.h"
 #ifdef EG_PLATFORM_SUPPORTS_MOVE_SEMANTICS
 #	include "Common-cpp/inc/Helpers/Data.h"
@@ -34,7 +34,7 @@ namespace ExitGames
 				void pushByteArray(nByte* byteArr, int length, bool setType);
 				void pushCustom(void* data, nByte customType, bool setType);
 
-				JString& toString(JString& retStr, bool withTypes=false) const;
+				virtual JString& toString(JString& retStr, bool withTypes=false) const;
 
 #ifdef EG_PLATFORM_SUPPORTS_MOVE_SEMANTICS
 				Helpers::Data release(void);

@@ -1,5 +1,5 @@
 /* Exit Games Photon Chat - C++ Client Lib
- * Copyright (C) 2004-2020 by Exit Games GmbH. All rights reserved.
+ * Copyright (C) 2004-2021 by Exit Games GmbH. All rights reserved.
  * http://www.photonengine.com
  * mailto:developer@photonengine.com
  */
@@ -17,10 +17,10 @@ namespace ExitGames
 			class AuthenticationValuesSecretSetter;
 		}
 
-		class AuthenticationValues : public Common::Base
+		class AuthenticationValues : public Common::ToString
 		{
 		public:
-			using Common::ToString::toString;
+			using ToString::toString;
 
 			AuthenticationValues(void);
 
@@ -29,8 +29,10 @@ namespace ExitGames
 			const Common::JString& getParameters(void) const;
 			AuthenticationValues& setParameters(const Common::JString& parameters);
 			AuthenticationValues& setParametersWithUsernameAndToken(const Common::JString& username, const Common::JString& token);
-			const Common::JVector<nByte>& getData(void) const;
+			const Common::Object& getData(void) const;
 			AuthenticationValues& setData(const Common::JVector<nByte>& data);
+			AuthenticationValues& setData(const Common::JString& data);
+			AuthenticationValues& setData(const Common::Dictionary<Common::JString, Common::Object>& data);
 			const Common::JString& getSecret(void) const;
 			const Common::JString& getUserID(void) const;
 			AuthenticationValues& setUserID(const Common::JString& userID);
@@ -41,7 +43,7 @@ namespace ExitGames
 
 			nByte mType;
 			Common::JString mParameters;
-			Common::JVector<nByte> mData;
+			Common::Object mData;
 			Common::JString mSecret;
 			Common::JString mUserID;
 

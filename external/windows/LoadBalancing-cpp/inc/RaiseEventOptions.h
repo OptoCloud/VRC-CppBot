@@ -1,5 +1,5 @@
 /* Exit Games Photon LoadBalancing - C++ Client Lib
- * Copyright (C) 2004-2020 by Exit Games GmbH. All rights reserved.
+ * Copyright (C) 2004-2021 by Exit Games GmbH. All rights reserved.
  * http://www.photonengine.com
  * mailto:developer@photonengine.com
  */
@@ -14,10 +14,10 @@ namespace ExitGames
 {
 	namespace LoadBalancing
 	{
-		class RaiseEventOptions : public Common::Base
+		class RaiseEventOptions : public Common::ToString
 		{
 		public:
-			using Common::ToString::toString;
+			using ToString::toString;
 
 			RaiseEventOptions(nByte channelID=0, nByte eventCaching=Lite::EventCache::DO_NOT_CACHE, const int* targetPlayers=NULL, short numTargetPlayers=0, nByte receiverGroup=Lite::ReceiverGroup::OTHERS, nByte interestGroup=0, const WebFlags& webFlags=WebFlags(), int cacheSliceIndex=0);
 			~RaiseEventOptions(void);

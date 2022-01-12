@@ -1,20 +1,22 @@
 /* Exit Games Photon LoadBalancing - C++ Client Lib
- * Copyright (C) 2004-2020 by Exit Games GmbH. All rights reserved.
+ * Copyright (C) 2004-2021 by Exit Games GmbH. All rights reserved.
  * http://www.photonengine.com
  * mailto:developer@photonengine.com
  */
 
 #pragma once
 
-#include "LoadBalancing-cpp/inc/FriendInfo.h"
-#include "LoadBalancing-cpp/inc/Listener.h"
-#include "LoadBalancing-cpp/inc/MutablePlayer.h"
-#include "LoadBalancing-cpp/inc/MutableRoom.h"
+#include "LoadBalancing-cpp/inc/ConnectOptions.h"
 #include "LoadBalancing-cpp/inc/Enums/DisconnectCause.h"
 #include "LoadBalancing-cpp/inc/Enums/ErrorCode.h"
 #include "LoadBalancing-cpp/inc/Enums/PeerStates.h"
 #include "LoadBalancing-cpp/inc/Enums/RegionSelectionMode.h"
 #include "LoadBalancing-cpp/inc/Enums/ServerType.h"
+#include "LoadBalancing-cpp/inc/FriendInfo.h"
+#include "LoadBalancing-cpp/inc/Listener.h"
+#include "LoadBalancing-cpp/inc/MutablePlayer.h"
+#include "LoadBalancing-cpp/inc/MutableRoom.h"
+#include "LoadBalancing-cpp/inc/SendDirectOptions.h"
 
 namespace ExitGames
 {
@@ -31,7 +33,7 @@ namespace ExitGames
 			Client(LoadBalancing::Listener& listener, const Common::JString& applicationID, const Common::JString& appVersion, nByte connectionProtocol=Photon::ConnectionProtocol::DEFAULT, bool autoLobbyStats=false, nByte regionSelectionMode=RegionSelectionMode::DEFAULT, bool useAlternativePorts=false);
 			virtual ~Client(void);
 
-			virtual bool connect(const AuthenticationValues& authenticationValues=AuthenticationValues(), const Common::JString& username=L"", const Common::JString& serverAddress=M_NAMESERVER, nByte serverType=ServerType::NAME_SERVER);
+			virtual bool connect(const ConnectOptions& connectOptions=ConnectOptions());
 			virtual void disconnect(void);
 
 			virtual void service(bool dispatchIncomingCommands=true);
@@ -68,14 +70,9 @@ namespace ExitGames
 
 			virtual bool selectRegion(const Common::JString& selectedRegion);
 			virtual bool reconnectAndRejoin(void);
-			template<typename Ftype> bool sendDirect(const Ftype& parameters, int targetPlayer, bool fallbackRelay=false);
-			template<typename Ftype> bool sendDirect(const Ftype pParameterArray, typename Common::Helpers::ArrayLengthType<Ftype>::type arrSize, int targetPlayer, bool fallbackRelay=false);
-			template<typename Ftype> bool sendDirect(const Ftype pParameterArray, const short* pArrSizes, int targetPlayer, bool fallbackRelay=false);
-			template<typename Ftype> int sendDirect(const Ftype& parameters, const Common::JVector<int>& targetPlayers=Common::JVector<int>(), bool fallbackRelay=false);
-			template<typename Ftype> int sendDirect(const Ftype pParameterArray, typename Common::Helpers::ArrayLengthType<Ftype>::type arrSize, const Common::JVector<int>& targetPlayers=Common::JVector<int>(), bool fallbackRelay=false);
-			template<typename Ftype> int sendDirect(const Ftype pParameterArray, const short* pArrSizes, const Common::JVector<int>& targetPlayers=Common::JVector<int>(), bool fallbackRelay=false);
-			int sendDirect(const nByte* pParameterArray, int arrSize);
-			int sendDirect(nByte* pParameterArray, int arrSize);
+			template<typename Ftype> int sendDirect(const Ftype& parameters, const SendDirectOptions& options=SendDirectOptions());
+			template<typename Ftype> int sendDirect(const Ftype pParameterArray, typename Common::Helpers::ArrayLengthType<Ftype>::type arrSize, const SendDirectOptions& options=SendDirectOptions());
+			template<typename Ftype> int sendDirect(const Ftype pParameterArray, const short* pArrSizes, const SendDirectOptions& options=SendDirectOptions());
 
 			int getServerTimeOffset(void) const;
 			int getServerTime(void) const;
@@ -172,15 +169,16 @@ namespace ExitGames
 			bool authenticate(void);
 			Common::JString addPortToAddress(const Common::JString& address, nByte serverType);
 			unsigned short getDefaultPort(nByte serverType, bool useAlternativePorts);
-			int sendDirect(const Common::JVector<nByte>& buffer, const Common::JVector<int>& targetPlayers, bool fallbackRelay);
+			int sendDirect(const Common::JVector<nByte>& buffer, const SendDirectOptions& options);
 			bool initPuncher(void);
 			bool startPunch(int playerNr);	
 			void onMasterClientChanged(int id, int oldID);
+			bool opRaiseEvent(bool reliable, const Common::Object& parameters, nByte eventCode, const RaiseEventOptions& options);
 
 			bool getIsOnGameServer(void) const;
 
-			Peer* mpPeer;
 			Listener& mListener;
+			Peer* mpPeer;
 			Common::Logger mLogger;
 			Common::JString mGameserver;
 			Common::JString mAppVersion;
@@ -227,7 +225,6 @@ namespace ExitGames
 			bool mUseAlternativePorts;
 			Internal::PuncherClient* mpPuncherClient;
 
-			static const EG_CHAR* M_NAMESERVER;
 			static const unsigned int M_PINGS_PER_REGION = 5;
 
 			friend class MutablePlayer;
@@ -240,21 +237,21 @@ namespace ExitGames
 		bool Client::opRaiseEvent(bool reliable, const Ftype& parameters, nByte eventCode, const RaiseEventOptions& options)
 		{
 			COMPILE_TIME_ASSERT2_TRUE_MSG(!Common::Helpers::ConfirmAllowed<Ftype>::dimensions, ERROR_THIS_OVERLOAD_IS_ONLY_FOR_SINGLE_VALUES);
-			return mpPeer->opRaiseEvent(reliable, parameters, eventCode, options);
+			return opRaiseEvent(reliable, Common::Helpers::ValueToObject<Common::Object>::get(parameters), eventCode, options);
 		}
 
 		template<typename Ftype>
 		bool Client::opRaiseEvent(bool reliable, const Ftype pParameterArray, typename Common::Helpers::ArrayLengthType<Ftype>::type arrSize, nByte eventCode, const RaiseEventOptions& options)
 		{
 			COMPILE_TIME_ASSERT2_TRUE_MSG(Common::Helpers::ConfirmAllowed<Ftype>::dimensions==1, ERROR_THIS_OVERLOAD_IS_ONLY_FOR_1D_ARRAYS);
-			return mpPeer->opRaiseEvent(reliable, pParameterArray, arrSize, eventCode, options);
+			return opRaiseEvent(reliable, Common::Helpers::ValueToObject<Common::Object>::get(pParameterArray, arrSize), eventCode, options);
 		}
 
 		template<typename Ftype>
 		bool Client::opRaiseEvent(bool reliable, const Ftype pParameterArray, const short* pArrSizes, nByte eventCode, const RaiseEventOptions& options)
 		{
 			COMPILE_TIME_ASSERT2_TRUE_MSG((Common::Helpers::ConfirmAllowed<Ftype>::dimensions>1), ERROR_THIS_OVERLOAD_IS_ONLY_FOR_MULTIDIMENSIONAL_ARRAYS);
-			return mpPeer->opRaiseEvent(reliable, pParameterArray, pArrSizes, eventCode, options);
+			return opRaiseEvent(reliable, Common::Helpers::ValueToObject<Common::Object>::get(pParameterArray, pArrSizes), eventCode, options);
 		}
 
 		template<typename Ftype>
@@ -279,57 +276,30 @@ namespace ExitGames
 		}
 
 		template<typename Ftype>
-		bool Client::sendDirect(const Ftype& parameters, int targetPlayer, bool fallbackRelay)
+		int Client::sendDirect(const Ftype& parameters, const SendDirectOptions& options)
 		{
 			COMPILE_TIME_ASSERT2_TRUE_MSG(!Common::Helpers::ConfirmAllowed<Ftype>::dimensions, ERROR_THIS_OVERLOAD_IS_ONLY_FOR_SINGLE_VALUES);
 			Common::Serializer s;
 			s.push(parameters);
-			return !!sendDirect(Common::JVector<nByte>(s.getData(), s.getSize()), Common::JVector<int>(&targetPlayer, 1), fallbackRelay);
+			return sendDirect(Common::JVector<nByte>(s.getData(), s.getSize()), options);
 		}
 
 		template<typename Ftype>
-		bool Client::sendDirect(const Ftype pParameterArray, typename Common::Helpers::ArrayLengthType<Ftype>::type arrSize, int targetPlayer, bool fallbackRelay)
+		int Client::sendDirect(const Ftype pParameterArray, typename Common::Helpers::ArrayLengthType<Ftype>::type arrSize, const SendDirectOptions& options)
 		{
 			COMPILE_TIME_ASSERT2_TRUE_MSG(Common::Helpers::ConfirmAllowed<Ftype>::dimensions==1, ERROR_THIS_OVERLOAD_IS_ONLY_FOR_1D_ARRAYS);
 			Common::Serializer s;
 			s.push(pParameterArray, arrSize);
-			return !!sendDirect(Common::JVector<nByte>(s.getData(), s.getSize()), Common::JVector<int>(&targetPlayer, 1), fallbackRelay);
+			return sendDirect(Common::JVector<nByte>(s.getData(), s.getSize()), options);
 		}
 
 		template<typename Ftype>
-		bool Client::sendDirect(const Ftype pParameterArray, const short* pArrSizes, int targetPlayer, bool fallbackRelay)
+		int Client::sendDirect(const Ftype pParameterArray, const short* pArrSizes, const SendDirectOptions& options)
 		{
 			COMPILE_TIME_ASSERT2_TRUE_MSG((Common::Helpers::ConfirmAllowed<Ftype>::dimensions>1), ERROR_THIS_OVERLOAD_IS_ONLY_FOR_MULTIDIMENSIONAL_ARRAYS);
 			Common::Serializer s;
 			s.push(pParameterArray, pArrSizes);
-			return !!sendDirect(Common::JVector<nByte>(s.getData(), s.getSize()), Common::JVector<int>(&targetPlayer, 1), fallbackRelay);
-		}
-
-		template<typename Ftype>
-		int Client::sendDirect(const Ftype& parameters, const Common::JVector<int>& targetPlayers, bool fallbackRelay)
-		{
-			COMPILE_TIME_ASSERT2_TRUE_MSG(!Common::Helpers::ConfirmAllowed<Ftype>::dimensions, ERROR_THIS_OVERLOAD_IS_ONLY_FOR_SINGLE_VALUES);
-			Common::Serializer s;
-			s.push(parameters);
-			return sendDirect(Common::JVector<nByte>(s.getData(), s.getSize()), targetPlayers, fallbackRelay);
-		}
-
-		template<typename Ftype>
-		int Client::sendDirect(const Ftype pParameterArray, typename Common::Helpers::ArrayLengthType<Ftype>::type arrSize, const Common::JVector<int>& targetPlayers, bool fallbackRelay)
-		{
-			COMPILE_TIME_ASSERT2_TRUE_MSG(Common::Helpers::ConfirmAllowed<Ftype>::dimensions==1, ERROR_THIS_OVERLOAD_IS_ONLY_FOR_1D_ARRAYS);
-			Common::Serializer s;
-			s.push(pParameterArray, arrSize);
-			return sendDirect(Common::JVector<nByte>(s.getData(), s.getSize()), targetPlayers, fallbackRelay);
-		}
-
-		template<typename Ftype>
-		int Client::sendDirect(const Ftype pParameterArray, const short* pArrSizes, const Common::JVector<int>& targetPlayers, bool fallbackRelay)
-		{
-			COMPILE_TIME_ASSERT2_TRUE_MSG((Common::Helpers::ConfirmAllowed<Ftype>::dimensions>1), ERROR_THIS_OVERLOAD_IS_ONLY_FOR_MULTIDIMENSIONAL_ARRAYS);
-			Common::Serializer s;
-			s.push(pParameterArray, pArrSizes);
-			return sendDirect(Common::JVector<nByte>(s.getData(), s.getSize()), targetPlayers, fallbackRelay);
+			return sendDirect(Common::JVector<nByte>(s.getData(), s.getSize()), options);
 		}
 	}
 }

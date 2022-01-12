@@ -1,5 +1,5 @@
 /* Exit Games Common - C++ Client Lib
-* Copyright (C) 2004-2020 by Exit Games GmbH. All rights reserved.
+* Copyright (C) 2004-2021 by Exit Games GmbH. All rights reserved.
 * http://www.photonengine.com
 * mailto:developer@photonengine.com
 */
@@ -9,7 +9,7 @@
 #include "Common-cpp/inc/CustomType.h"
 #include "Common-cpp/inc/Enums/TypeCode.h"
 #include "Common-cpp/inc/Helpers/CompileTimeAssertTrue.h"
-#include "Common-cpp/inc/Helpers/IsDerivedFrom.h"
+#include "Common-cpp/inc/Helpers/TypeTraits/IsDerivedFrom.h"
 
 namespace ExitGames
 {
@@ -24,7 +24,7 @@ namespace ExitGames
 		{
 			template<typename CType, unsigned int N=0> struct ConfirmAllowed
 			{
-				COMPILE_TIME_ASSERT_TRUE_MSG((IsDerivedFrom<CType, CustomType<CType::TypeCode> >::Is), ERROR_UNSUPPORTED_VALUE_TYPE);
+				COMPILE_TIME_ASSERT_TRUE_MSG((IsDerivedFrom<CType, CustomType<CType, CType::TypeCode> >::is), ERROR_UNSUPPORTED_VALUE_TYPE);
 				typedef CType type;
 				typedef CType scalarType;
 				static const unsigned int dimensions = 0;

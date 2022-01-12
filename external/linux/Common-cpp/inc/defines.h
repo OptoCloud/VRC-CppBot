@@ -1,17 +1,24 @@
 /* Exit Games Common - C++ Client Lib
- * Copyright (C) 2004-2020 by Exit Games GmbH. All rights reserved.
+ * Copyright (C) 2004-2021 by Exit Games GmbH. All rights reserved.
  * http://www.photonengine.com
  * mailto:developer@photonengine.com
  */
 
 #pragma once
 
-#if !defined _EG_LINUX_PLATFORM && !defined _EG_MARMALADE_PLATFORM && !defined _EG_IPHONE_PLATFORM && !defined _EG_IMAC_PLATFORM && !defined _EG_WINDOWS_PLATFORM && !defined _EG_ANDROID_PLATFORM && !defined _EG_BLACKBERRY_PLATFORM && !defined _EG_PS3_PLATFORM && !defined _EG_PS4_PLATFORM && !defined _EG_WINDOWSSTORE_PLATFORM && !defined _EG_EMSCRIPTEN_PLATFORM && !defined _EG_XB1_PLATFORM && !defined _EG_PSVITA_PLATFORM && !defined _EG_SWITCH_PLATFORM
+#if !defined _EG_LINUX_PLATFORM && !defined _EG_MARMALADE_PLATFORM && !defined _EG_IPHONE_PLATFORM && !defined _EG_IMAC_PLATFORM && !defined _EG_WINDOWS_PLATFORM && !defined _EG_ANDROID_PLATFORM && !defined _EG_BLACKBERRY_PLATFORM && !defined _EG_PS3_PLATFORM && !defined _EG_PS4_PLATFORM && !defined _EG_TVOS_PLATFORM && !defined _EG_WINDOWSSTORE_PLATFORM && !defined _EG_EMSCRIPTEN_PLATFORM && !defined _EG_XB1_PLATFORM && !defined _EG_PSVITA_PLATFORM && !defined _EG_SWITCH_PLATFORM && !defined _EG_GAMECORE_PLATFORM && !defined _EG_PS5_PLATFORM
 #	include "Common-cpp/inc/platform_definition.h"
 #endif
 
-#if defined _EG_IPHONE_PLATFORM || defined _EG_IMAC_PLATFORM
+#if defined _EG_IPHONE_PLATFORM || defined _EG_IMAC_PLATFORM || defined _EG_TVOS_PLATFORM
 #	define _EG_APPLE_PLATFORM true
+#endif
+
+#if defined _EG_IPHONE_PLATFORM
+#	include <TargetConditionals.h>
+#	if defined TARGET_OS_MACCATALYST
+#		define _EG_IPHONE_MACCATALYST_PLATFORM
+#	endif
 #endif
 
 #if defined _EG_SWITCH_PLATFORM
@@ -23,12 +30,44 @@
 #	endif
 #endif
 
-#if defined _EG_LINUX_PLATFORM || defined _EG_MARMALADE_PLATFORM || defined _EG_APPLE_PLATFORM || defined _EG_ANDROID_PLATFORM || defined _EG_BLACKBERRY_PLATFORM || defined _EG_PS3_PLATFORM || defined _EG_PS4_PLATFORM || defined _EG_EMSCRIPTEN_PLATFORM || defined _EG_PSVITA_PLATFORM || defined _EG_SWITCH_PLATFORM
+#if defined _EG_PS3_PLATFORM || defined _EG_PSVITA_PLATFORM || defined _EG_PS4_PLATFORM || defined _EG_PS5_PLATFORM
+#	define _EG_SONY_PLATFORM true
+#	if !defined _EG_PS3_PLATFORM
+#		define _EG_PSVITA_OR_NEWER_PLATFORM true
+#		if !defined _EG_PSVITA_PLATFORM
+#			define _EG_PS4_OR_NEWER_PLATFORM true
+#			if !defined _EG_PS4_PLATFORM
+#				define _EG_PS5_OR_NEWER_PLATFORM true
+#			endif
+#		endif
+#	endif
+#endif
+
+#if defined _EG_LINUX_PLATFORM || defined _EG_MARMALADE_PLATFORM || defined _EG_APPLE_PLATFORM || defined _EG_ANDROID_PLATFORM || defined _EG_BLACKBERRY_PLATFORM || defined _EG_SONY_PLATFORM || defined _EG_EMSCRIPTEN_PLATFORM || defined _EG_SWITCH_PLATFORM
 #	define _EG_UNIX_PLATFORM true
 #endif
 
+#if defined _EG_GAMECORE_PLATFORM
+#	if defined _GAMING_DESKTOP
+#		define _EG_GAMECORE_DESKTOP_PLATFORM
+#	elif defined _GAMING_XBOX_XBOXONE
+#		define _EG_GAMECORE_XB1_PLATFORM
+#	elif defined _GAMING_XBOX_SCARLETT
+#		define _EG_GAMECORE_SCARLETT_PLATFORM
+#	else
+#		error unknown GameCore platform
+#	endif
+#endif
+
+#if defined _EG_WINDOWS_PLATFORM || defined _EG_WINDOWSSTORE_PLATFORM || defined _EG_XB1_PLATFORM || defined _EG_GAMECORE_PLATFORM
+#	define _EG_MICROSOFT_PLATFORM
+#	if defined _EG_XB1_PLATFORM || defined _EG_GAMECORE_XB1_PLATFORM || defined _EG_GAMECORE_SCARLETT_PLATFORM
+#		define _EG_MICROSOFT_CONSOLE_PLATFORM
+#	endif
+#endif
+
  // Marmalade really even defines _MSC_VER, when using another compiler, so we have to additionally check, that no other compiler (of the used by Marmalade ones) is running
-#if defined _EG_WINDOWS_PLATFORM || defined _EG_WINDOWSSTORE_PLATFORM || defined _EG_XB1_PLATFORM || (defined _EG_MARMALADE_PLATFORM && defined _MSC_VER && !defined __clang__ && !defined __gcc__ && defined I3D_ARCH_X86) || defined _EG_SWITCH_WINDOWS_PLATFORM
+#if defined _EG_MICROSOFT_PLATFORM || (defined _EG_MARMALADE_PLATFORM && defined _MSC_VER && !defined __clang__ && !defined __gcc__ && defined I3D_ARCH_X86) || defined _EG_SWITCH_WINDOWS_PLATFORM
 #	define _EG_MS_COMPILER true
 #endif
 
@@ -143,7 +182,7 @@ typedef wchar_t EG_CHAR;
 #	endif
 #endif
 
-#if defined _EG_WINDOWS_PLATFORM || defined _EG_WINDOWSSTORE_PLATFORM || defined _EG_XB1_PLATFORM
+#if defined _EG_MICROSOFT_PLATFORM
 #	define SNWPRINTF                        _snwprintf
 #elif defined _EG_MARMALADE_PLATFORM && (!defined I3D_ARCH_X86 || !(defined _EG_MS_COMPILER || defined __clang__)) && !defined I3D_ARCH_64_BIT && !defined S3E_IPHONE_STATIC_LINK || defined _EG_ANDROID_PLATFORM || defined _EG_EMSCRIPTEN_PLATFORM
 #	define SNWPRINTF                        EG_swprintf // very expensive, use with care!
@@ -157,23 +196,27 @@ typedef wchar_t EG_CHAR;
 // on different platforms and are only to be used for time intervals between two calls
 
 #include <time.h>
-#if defined _EG_WINDOWS_PLATFORM || defined _EG_WINDOWSSTORE_PLATFORM
-#	define WIN32_LEAN_AND_MEAN
+#if defined _EG_MICROSOFT_PLATFORM
+#	ifndef WIN32_LEAN_AND_MEAN
+#		define WIN32_LEAN_AND_MEAN
+#	endif
 #	ifndef _WIN32_WINNT
-#		if defined _EG_WINDOWS_PLATFORM
-#			define _WIN32_WINNT _WIN32_WINNT_VISTA
-#		elif defined _EG_WINDOWSSTORE_PLATFORM
+#		if defined _EG_GAMECORE_DESKTOP_PLATFORM
+#			define _WIN32_WINNT _WIN32_WINNT_WIN10
+#		else
 #			define _WIN32_WINNT _WIN32_WINNT_WIN8
 #		endif
 #	endif
 #	include <Windows.h>
-#	include <Mmsystem.h>
-#	define GETTIMEMS() static_cast<int>(GetTickCount64()) // returns the number of milliseconds for which the computer was powered on (overflowing all about 49 days!)
+#	if defined _EG_WINDOWS_PLATFORM || defined _EG_GAMECORE_DESKTOP_PLATFORM
+#		include <Mmsystem.h>
+#		define GETTIMEMS() static_cast<int>(timeGetTime()) // returns the number of milliseconds for which the computer was powered on (overflowing all about 49 days!), higher precision than GetTickCount64(), but only available on Windows Desktop and GameCore Desktop
+#	else
+#		define GETTIMEMS() static_cast<int>(GetTickCount64()) // returns the number of milliseconds for which the computer was powered on (overflowing all about 49 days!)
+#	endif
 #elif defined _EG_UNIX_PLATFORM
+	int getTimeUnix(void);
 #	define GETTIMEMS getTimeUnix // returns the number of milliseconds passed since 1970 (overflowing all about 49 days!)
-#elif defined _EG_XB1_PLATFORM
-#	include <Windows.h>
-#	define GETTIMEMS() static_cast<int>(GetTickCount64()) // returns the number of milliseconds for which the computer was powered on (overflowing all about 49 days!)
 #endif
 #define GETUPTIMEMS GETTIMEMS
 
@@ -185,7 +228,7 @@ typedef wchar_t EG_CHAR;
 #endif
 #if defined DBGPRINTF_LEVEL || defined DBGPRINTF_MEMORY_ACTIVE || defined DBGPRINTF_PERFORMANCE_ACTIVE
 
-#if(defined _EG_WINDOWS_PLATFORM || defined _EG_WINDOWSSTORE_PLATFORM) && defined __cplusplus
+#if defined _EG_MS_COMPILER && defined __cplusplus
 #	pragma managed(push, off)
 #endif
 #ifdef __cplusplus
@@ -203,7 +246,7 @@ typedef wchar_t EG_CHAR;
 #ifdef  __cplusplus
 	}
 #endif
-#if(defined _EG_WINDOWS_PLATFORM || defined _EG_WINDOWSSTORE_PLATFORM) && defined __cplusplus
+#if defined _EG_MS_COMPILER && defined __cplusplus
 #	pragma managed(pop)
 #endif
 

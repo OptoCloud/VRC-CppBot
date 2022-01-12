@@ -1,5 +1,5 @@
 /* Exit Games Photon - C++ Client Lib
- * Copyright (C) 2004-2020 by Exit Games GmbH. All rights reserved.
+ * Copyright (C) 2004-2021 by Exit Games GmbH. All rights reserved.
  * http://www.photonengine.com
  * mailto:developer@photonengine.com
  */
@@ -39,7 +39,7 @@ namespace ExitGames
 			 defines the type of operation called on Photon and in turn also the return values. They are provided as a Hashtable which contains the complete reponse of Photon, including keys for
 			 operation code and return code. Each operation returns its opCode and returnCode but anything else can be defined serverside.
 		 
-			 @param operationResponse the @link OperationResponse\endlink                      */
+			 @param operationResponse the OperationResponsee */
 			virtual void onOperationResponse(const OperationResponse& operationResponse) = 0;
 
 			/** 
@@ -77,9 +77,9 @@ namespace ExitGames
 		 
 			 If the received event has been raised by another player by calling LitePeer::opRaiseEvent(), the transmitted payload hashtable will be stored in the "parameters" hashtable of at key
 			 EV_RT_KEY_DATA. Please refer to the demos for sample code.
-			 @param eventData the @link EventData\endlink
+			 @param eventData the EventData
 			 @sa
-			 @link SendingAndReceivingData Sending and receiving data\endlink, LitePeer::opRaiseEvent()*/
+			 @link SendingAndReceivingData Sending and receiving data\endlink, LitePeer::opRaiseEvent() */
 			virtual void onEvent(const EventData& eventData) = 0;
 			
 			virtual void onMessage(const Common::Object& /*message*/) {};
@@ -98,7 +98,7 @@ namespace ExitGames
 			 @param address the address, which has been pinged
 			 @param pingResult the time in ms
 			 @sa
-			 @link PhotonPeer::pingServer()\endlink*/
+			 PhotonPeer::pingServer() */
 #if defined EG_PLATFORM_SUPPORTS_CPP11 && defined EG_PLATFORM_SUPPORTS_MULTITHREADING
 			virtual void onPingResponse(const Common::JString& EG_UNUSED(address), unsigned int EG_UNUSED(pingResult)){}
 #endif

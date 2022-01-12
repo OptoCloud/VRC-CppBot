@@ -1,5 +1,5 @@
 /* Exit Games Common - C++ Client Lib
- * Copyright (C) 2004-2020 by Exit Games GmbH. All rights reserved.
+ * Copyright (C) 2004-2021 by Exit Games GmbH. All rights reserved.
  * http://www.photonengine.com
  * mailto:developer@photonengine.com
  */
@@ -38,7 +38,7 @@ namespace ExitGames
 			nByte getCustomType(void) const;
 			const short* getSizes(void) const;
 			unsigned int getDimensions(void) const;
-			JString& toString(JString& retStr, bool withTypes=false) const;
+			virtual JString& toString(JString& retStr, bool withTypes=false) const;
 		protected:
 			Object(const void* data, nByte type, nByte customType, bool makeCopy);
 			Object(const void* data, nByte type, nByte customType, int size, bool makeCopy);

@@ -78,7 +78,7 @@ namespace ExitGames
 
 				// :: EndPoint Utils
 				const Internal::Punchthrough::Forwards::SockaddrIn& getLocalEndpoint(void);
-				void aquireExternalEndpoint(void);
+				void acquireExternalEndpoint(void);
 
 				static const Common::JString addrToStr(const Internal::Punchthrough::Forwards::SockaddrIn& addr);
 
@@ -86,7 +86,7 @@ namespace ExitGames
 				RelayClient* mpRelayClient;
 				PunchListener* mpPunchListener;
 
-				Common::Logger mLogger;
+				const Common::Logger& mLogger;
 
 				Common::Helpers::UniquePointer<Internal::Punchthrough::Forwards::SockaddrIn> mupClientExternAddr;
 				bool mValidExternalAddr;

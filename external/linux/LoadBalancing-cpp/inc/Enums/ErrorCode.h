@@ -1,5 +1,5 @@
 /* Exit Games Photon LoadBalancing - C++ Client Lib
- * Copyright (C) 2004-2020 by Exit Games GmbH. All rights reserved.
+ * Copyright (C) 2004-2021 by Exit Games GmbH. All rights reserved.
  * http://www.photonengine.com
  * mailto:developer@photonengine.com
  */
@@ -43,12 +43,15 @@ namespace ExitGames
 			static const int EXTERNAL_HTTP_CALL_FAILED           = 32744;
 			static const int SLOT_ERROR                          = 32742;
 			static const int INVALID_ENCRYPTION_PARAMETERS       = 32741;
+			static const int CLIENT_VERSION_TOO_OLD              = 32667;
+			static const int CLIENT_VERSION_INVALID              = 32666;
+			static const int DASHBOARD_VERSION_INVALID           = 32665;
 
 			// client Photon: 1001-2000 (see Photon-cpp StatusCode.h)
 
 			// client LoadBalancing: > 2000
 			// currently none
-		};
+		}
 		/** @file */
 	}
 }

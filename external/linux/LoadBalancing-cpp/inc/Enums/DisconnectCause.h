@@ -1,5 +1,5 @@
 /* Exit Games Photon LoadBalancing - C++ Client Lib
- * Copyright (C) 2004-2020 by Exit Games GmbH. All rights reserved.
+ * Copyright (C) 2004-2021 by Exit Games GmbH. All rights reserved.
  * http://www.photonengine.com
  * mailto:developer@photonengine.com
  */
@@ -27,6 +27,9 @@ namespace ExitGames
 			static const int INVALID_REGION                         =  9; ///<OnOperationResponse: Authenticate when the app's Photon Cloud subscription is locked to some (other) region(s). Update your subscription or master server address.
 			static const int OPERATION_NOT_ALLOWED_IN_CURRENT_STATE = 10; ///<OnOperationResponse: Operation that's (currently) not available for this client (not authorized usually). Only tracked for op Authenticate.
 			static const int CUSTOM_AUTHENTICATION_FAILED           = 11; ///<OnOperationResponse: Authenticate in the Photon Cloud with invalid client values or custom authentication setup in Cloud Dashboard.
+			static const int CLIENT_VERSION_TOO_OLD                 = 12; ///<OnOperationResponse: The client attempted to authenticate with a smaller value for the version number than the minimum permitted value that was set-up in the dashboad
+			static const int CLIENT_VERSION_INVALID                 = 13; ///<OnOperationResponse: The value specified by the client for the authentication version number is not a positive integer
+			static const int DASHBOARD_VERSION_INVALID              = 14; ///<OnOperationResponse: The value specified in the dashboard for the authentication version number is not a positive integer
 		}
 		/** @file */
 	}

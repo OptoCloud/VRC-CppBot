@@ -1,5 +1,5 @@
 /* Exit Games Common - C++ Client Lib
-* Copyright (C) 2004-2020 by Exit Games GmbH. All rights reserved.
+* Copyright (C) 2004-2021 by Exit Games GmbH. All rights reserved.
 * http://www.photonengine.com
 * mailto:developer@photonengine.com
 */
@@ -7,18 +7,18 @@
 #pragma once
 
 #include "Common-cpp/inc/CustomTypeBase.h"
-#include "Common-cpp/inc/CustomTypeFactory.h"
+#include "Common-cpp/inc/Helpers/CustomTypeFactory.h"
 
 namespace ExitGames
 {
 	namespace Common
 	{
-		template<nByte typeCode>
+		template<typename T, nByte typeCode>
 		class CustomType : public CustomTypeBase
 		{
 		public:
-			static void constructClass(const CustomTypeFactory<typeCode>& factory);
-			static void deconstructClass(void);
+			static void registerType(void);
+			static void unregisterType(void);
 
 			static const nByte TypeCode = typeCode;
 		protected:
@@ -32,20 +32,20 @@ namespace ExitGames
 			static void cfree(const void* pData, nByte customTypeCode);
 			static unsigned int csizeOf(nByte customTypeCode);
 
-			static CustomTypeFactory<typeCode>* mFactory;
+			static Helpers::CustomTypeFactory<T, typeCode>* mpFactory;
 		};
 
 
 
 		/** @file */
 
-		template<nByte typeCode>
-		CustomTypeFactory<typeCode>* CustomType<typeCode>::mFactory = NULL;
+		template<typename T, nByte typeCode>
+		Helpers::CustomTypeFactory<T, typeCode>* CustomType<T, typeCode>::mpFactory = NULL;
 
 		/** @class CustomType
 		   The CustomType class provides you with an interface, to add support for additional data-types.
 		   @details
-		   We only support a certain subset of @link Datatypes\endlink out of the box.
+		   We only support a certain subset of @link Datatypes Datatypes\endlink out of the box.
 		   If you need support for further datatypes, then you can easily add this support yourself by subclassing this
 		   class template and providing suitable implementations for the pure virtual functions, which are inherited from CustomTypeBase,
 		   in your subclass.
@@ -64,59 +64,58 @@ namespace ExitGames
 			This should normally not be of any interest.*/
 		
 		/**
-		   This static function initializes the class and has to be called once before any instance of a concrete subclass gets created.
-		   It registers the typecode and sets the factory-class to a copy of the passed parameter.
-		   @sa deconstructClass()
-		   @param factory an instance of the factory class, which will be used to create instances of this class*/
-		template<nByte typeCode>
-		void CustomType<typeCode>::constructClass(const CustomTypeFactory<typeCode>& factory)
+		   This static function registers the custom type and has to be called once on each concrete subclass, before any instance of that
+		   concrete subclass gets created.
+		   @sa unregisterType()*/
+		template<typename T, nByte typeCode>
+		void CustomType<T, typeCode>::registerType(void)
 		{
 			super::constructClass(typeCode, &ccalloc, &cfree, &csizeOf);
-			mFactory = factory.copyFactory();
+			mpFactory = MemoryManagement::allocate<Helpers::CustomTypeFactory<T, typeCode> >();
 		}
 		
 		/**
-		   This static function cleans up the class and has to be called once after the last instance of a concrete subclass has been
-		   deallocated. It will then deallocate the shared instance of the according CustomTypeFactory subclass.
-		   @sa constructClass() */
-		template<nByte typeCode>
-		void CustomType<typeCode>::deconstructClass(void)
+		   This static function unregisters a custom type and has to be called once for each concrete subclass after the last instance of that
+		   subclass has been deallocated.
+		   @sa registerType() */
+		template<typename T, nByte typeCode>
+		void CustomType<T, typeCode>::unregisterType(void)
 		{
-			super::deconstructClass(typeCode);
-			mFactory->destroyFactory(); // not just deleting it, as subclasses could potentially implement copyFactory() by using something else then new
+			super::destructClass(typeCode);
+			MemoryManagement::deallocate(mpFactory);
 		}
 
-		template<nByte typeCode>
-		CustomType<typeCode>::CustomType(void)
-		{
-		}
-
-		template<nByte typeCode>
-		CustomType<typeCode>::CustomType(const CustomType& /*toCopy*/)
+		template<typename T, nByte typeCode>
+		CustomType<T, typeCode>::CustomType(void)
 		{
 		}
 
-		template<nByte typeCode>
-		CustomType<typeCode>::~CustomType(void)
+		template<typename T, nByte typeCode>
+		CustomType<T, typeCode>::CustomType(const CustomType& /*toCopy*/)
 		{
 		}
 
-		template<nByte typeCode>
-		void* CustomType<typeCode>::ccalloc(short count, nByte /*customTypeCode*/)
+		template<typename T, nByte typeCode>
+		CustomType<T, typeCode>::~CustomType(void)
 		{
-			return mFactory->create(count);
 		}
 
-		template<nByte typeCode>
-		void CustomType<typeCode>::cfree(const void* pData, nByte /*customTypeCode*/)
+		template<typename T, nByte typeCode>
+		void* CustomType<T, typeCode>::ccalloc(short count, nByte /*customTypeCode*/)
 		{
-			mFactory->destroy(static_cast<const CustomType<typeCode>*>(pData));
+			return mpFactory->create(count);
 		}
 
-		template<nByte typeCode>
-		unsigned int CustomType<typeCode>::csizeOf(nByte /*customTypeCode*/)
+		template<typename T, nByte typeCode>
+		void CustomType<T, typeCode>::cfree(const void* pData, nByte /*customTypeCode*/)
 		{
-			return mFactory->sizeOf();
+			mpFactory->destroy(static_cast<const CustomType<T, typeCode>*>(pData));
+		}
+
+		template<typename T, nByte typeCode>
+		unsigned int CustomType<T, typeCode>::csizeOf(nByte /*customTypeCode*/)
+		{
+			return mpFactory->sizeOf();
 		}
 	}
 }

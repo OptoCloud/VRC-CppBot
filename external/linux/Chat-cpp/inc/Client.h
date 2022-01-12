@@ -1,5 +1,5 @@
 /* Exit Games Photon Chat - C++ Client Lib
- * Copyright (C) 2004-2020 by Exit Games GmbH. All rights reserved.
+ * Copyright (C) 2004-2021 by Exit Games GmbH. All rights reserved.
  * http://www.photonengine.com
  * mailto:developer@photonengine.com
  */
@@ -152,63 +152,63 @@ namespace ExitGames
 		bool Client::opPublishMessage(const Common::JString& channelName, const Ftype& message)
 		{
 			COMPILE_TIME_ASSERT2_TRUE_MSG(!Common::Helpers::ConfirmAllowed<Ftype>::dimensions, ERROR_THIS_OVERLOAD_IS_ONLY_FOR_SINGLE_VALUES);
-			return opPublishMessage(channelName, Common::Helpers::ValueToObject::get(message));
+			return opPublishMessage(channelName, Common::Helpers::ValueToObject<Common::Object>::get(message));
 		}
 
 		template<typename Ftype>
 		bool Client::opPublishMessage(const Common::JString& channelName, const Ftype pMessageArray, typename Common::Helpers::ArrayLengthType<Ftype>::type arrSize)
 		{
 			COMPILE_TIME_ASSERT2_TRUE_MSG(Common::Helpers::ConfirmAllowed<Ftype>::dimensions==1, ERROR_THIS_OVERLOAD_IS_ONLY_FOR_1D_ARRAYS);
-			return opPublishMessage(channelName, Common::Helpers::ValueToObject::get(pMessageArray, arrSize));
+			return opPublishMessage(channelName, Common::Helpers::ValueToObject<Common::Object>::get(pMessageArray, arrSize));
 		}
 
 		template<typename Ftype>
 		bool Client::opPublishMessage(const Common::JString& channelName, const Ftype pMessageArray, const short* pArrSizes)
 		{
 			COMPILE_TIME_ASSERT2_TRUE_MSG((Common::Helpers::ConfirmAllowed<Ftype>::dimensions>1), ERROR_THIS_OVERLOAD_IS_ONLY_FOR_MULTIDIMENSIONAL_ARRAYS);
-			return opPublishMessage(channelName, Common::Helpers::ValueToObject::get(pMessageArray, pArrSizes));
+			return opPublishMessage(channelName, Common::Helpers::ValueToObject<Common::Object>::get(pMessageArray, pArrSizes));
 		}
 
 		template<typename Ftype>
 		bool Client::opSendPrivateMessage(const Common::JString& userName, const Ftype& message, bool encrypt)
 		{
 			COMPILE_TIME_ASSERT2_TRUE_MSG(!Common::Helpers::ConfirmAllowed<Ftype>::dimensions, ERROR_THIS_OVERLOAD_IS_ONLY_FOR_SINGLE_VALUES);
-			return opSendPrivateMessage(userName, Common::Helpers::ValueToObject::get(message), encrypt);
+			return opSendPrivateMessage(userName, Common::Helpers::ValueToObject<Common::Object>::get(message), encrypt);
 		}
 
 		template<typename Ftype>
 		bool Client::opSendPrivateMessage(const Common::JString& userName, const Ftype pMessageArray, typename Common::Helpers::ArrayLengthType<Ftype>::type arrSize, bool encrypt)
 		{
 			COMPILE_TIME_ASSERT2_TRUE_MSG(Common::Helpers::ConfirmAllowed<Ftype>::dimensions==1, ERROR_THIS_OVERLOAD_IS_ONLY_FOR_1D_ARRAYS);
-			return opSendPrivateMessage(userName, Common::Helpers::ValueToObject::get(pMessageArray, arrSize), encrypt);
+			return opSendPrivateMessage(userName, Common::Helpers::ValueToObject<Common::Object>::get(pMessageArray, arrSize), encrypt);
 		}
 
 		template<typename Ftype>
 		bool Client::opSendPrivateMessage(const Common::JString& userName, const Ftype pMessageArray, const short* pArrSizes, bool encrypt)
 		{
 			COMPILE_TIME_ASSERT2_TRUE_MSG((Common::Helpers::ConfirmAllowed<Ftype>::dimensions>1), ERROR_THIS_OVERLOAD_IS_ONLY_FOR_MULTIDIMENSIONAL_ARRAYS);
-			return opSendPrivateMessage(userName, Common::Helpers::ValueToObject::get(pMessageArray, pArrSizes), encrypt);
+			return opSendPrivateMessage(userName, Common::Helpers::ValueToObject<Common::Object>::get(pMessageArray, pArrSizes), encrypt);
 		}
 
 		template<typename Ftype>
 		bool Client::opSetOnlineStatus(int status, const Ftype& message)
 		{
 			COMPILE_TIME_ASSERT2_TRUE_MSG(!Common::Helpers::ConfirmAllowed<Ftype>::dimensions, ERROR_THIS_OVERLOAD_IS_ONLY_FOR_SINGLE_VALUES);
-			return opSetOnlineStatus(status, Common::Helpers::ValueToObject::get(message), false);
+			return opSetOnlineStatus(status, Common::Helpers::ValueToObject<Common::Object>::get(message), false);
 		}
 
 		template<typename Ftype>
 		bool Client::opSetOnlineStatus(int status, const Ftype pMessageArray, typename Common::Helpers::ArrayLengthType<Ftype>::type arrSize)
 		{
 			COMPILE_TIME_ASSERT2_TRUE_MSG(Common::Helpers::ConfirmAllowed<Ftype>::dimensions==1, ERROR_THIS_OVERLOAD_IS_ONLY_FOR_1D_ARRAYS);
-			return opSetOnlineStatus(status, Common::Helpers::ValueToObject::get(pMessageArray, arrSize), false);
+			return opSetOnlineStatus(status, Common::Helpers::ValueToObject<Common::Object>::get(pMessageArray, arrSize), false);
 		}
 
 		template<typename Ftype>
 		bool Client::opSetOnlineStatus(int status, const Ftype pMessageArray, const short* pArrSizes)
 		{
 			COMPILE_TIME_ASSERT2_TRUE_MSG((Common::Helpers::ConfirmAllowed<Ftype>::dimensions>1), ERROR_THIS_OVERLOAD_IS_ONLY_FOR_MULTIDIMENSIONAL_ARRAYS);
-			return opSetOnlineStatus(status, Common::Helpers::ValueToObject::get(pMessageArray, pArrSizes), false);
+			return opSetOnlineStatus(status, Common::Helpers::ValueToObject<Common::Object>::get(pMessageArray, pArrSizes), false);
 		}
 	}
 }

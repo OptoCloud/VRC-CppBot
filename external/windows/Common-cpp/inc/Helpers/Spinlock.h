@@ -1,5 +1,5 @@
 /* Exit Games Common - C++ Client Lib
- * Copyright (C) 2004-2020 by Exit Games GmbH. All rights reserved.
+ * Copyright (C) 2004-2021 by Exit Games GmbH. All rights reserved.
  * http://www.photonengine.com
  * mailto:developer@photonengine.com
  */
@@ -25,6 +25,9 @@ namespace ExitGames
 				void unlock(void);
 #ifdef EG_PLATFORM_SUPPORTS_ATOMICS
 			private:
+				Spinlock(const Spinlock& notCopyable);
+				Spinlock& operator=(const Spinlock& notCopyable);
+
 				std::atomic<Thread::ID> mLockOwner;
 				nByte mLockCount;
 #endif

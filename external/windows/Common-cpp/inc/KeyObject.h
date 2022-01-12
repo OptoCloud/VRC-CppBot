@@ -1,5 +1,5 @@
 /* Exit Games Common - C++ Client Lib
- * Copyright (C) 2004-2020 by Exit Games GmbH. All rights reserved.
+ * Copyright (C) 2004-2021 by Exit Games GmbH. All rights reserved.
  * http://www.photonengine.com
  * mailto:developer@photonengine.com
  */
@@ -52,7 +52,7 @@ namespace ExitGames
 
 		   Creates an object out of a deep copy of its parameter.
 
-		   The parameter has to be of the same template overload as the
+		   The parameter has to be of the same template instantiation as the
 		   object, you want to create.
 		   @param toCopy The object to copy.                                */
 		template<typename Etype>
@@ -66,7 +66,7 @@ namespace ExitGames
 		   Creates an object out of a deep copy of the passed Object&.
 	   
 		   If the type of the content of the passed object does not
-		   match the template overload of the object to create, an empty
+		   match the template instantiation of the object to create, an empty
 		   object is created instead of a copy of the passed object,
 		   which leads to getDataCopy()
 		   and getDataAddress() return
@@ -84,7 +84,7 @@ namespace ExitGames
 		   Creates an object out of a deep copy of the passed Object*.
 	   
 		   If the type of the content of the passed object does not
-		   match the template overload of the object to create, an empty
+		   match the template instantiation of the object to create, an empty
 		   object is created instead of a copy of the passed object,
 		   which leads to getDataCopy()
 		   and getDataAddress() return
@@ -128,7 +128,7 @@ namespace ExitGames
 		   left operand. This overwrites old data in the left operand.
 
 		   If the type of the content of the right operand does not
-		   match the template overload of the left operand, then the left
+		   match the template instantiation of the left operand, then the left
 		   operand stays unchanged.  */
 		template<typename Etype>
 		KeyObject<Etype>& KeyObject<Etype>::operator=(const Object& toCopy)
@@ -151,7 +151,7 @@ namespace ExitGames
 		   instead to avoid the deep copy. That is especially
 		   interesting for large content, of course.
 	   
-		   If successful, the template overloads for array types of this
+		   If successful, the template instantiations for array types of this
 		   function allocate the data for the copy, so you have to free
 		   (for arrays of primitive types) or delete (for arrays of
 		   class objects) it, as soon, as you do not need the array
@@ -179,7 +179,7 @@ namespace ExitGames
 		   call getDataCopy().
 	   
 		   The return type is a pointer to the data, so it is a
-		   double-pointer, of course, for template overloads, which data
+		   double-pointer, of course, for template instantiations, which data
 		   already is a pointer.
 	   
 		   In case of an error, this function returns 0.
