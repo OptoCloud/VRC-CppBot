@@ -2,12 +2,14 @@
 #include "apiclient.h"
 #include "photonclient.h"
 
+#include <QDebug>
+
 int main(int argc, char** argv)
 {
     QCoreApplication a(argc, argv);
-
+/*
     auto apiClient = std::make_shared<VRChad::ApiClient>();
-    apiClient->login(VRChad::ApiClient::genAuthCookie("username", "password"));
+    apiClient->login(VRChad::ApiClient::genAuthCookie("eirik.boee64@gmail.com", "Roboslayer9865"));
 
     std::shared_ptr<VRChad::PhotonClient> photonClient;
 
@@ -17,8 +19,8 @@ int main(int argc, char** argv)
 
         }
     });
-
-    //VRChad::PhotonClient cli(L"usr_0c5507b7-fdee-4101-a0e1-319645de64de", L"authcookie_0e0744a2-878d-4de0-9664-c186a908ebd9", L"440B2A8E26703A65A04A5318C487D83230938853BF");
+*/
+    VRChad::PhotonClient cli("2021.4.2p2-1160--Release", "usr_34da7bcd-271a-4c41-b04a-c4f53b5738ba", "authcookie_8210ad58-d9ab-45be-aebf-368100db35de", "BB4725700AF1396D7C2263D53CF7F5947CB9CE9CDA");
 
     return a.exec();
 }

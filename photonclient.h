@@ -18,7 +18,10 @@ public:
 private:
     void photonLoop();
 
-    void onOperationResponse(const ExitGames::Photon::OperationResponse& operationResponse) override;
+    void connectToRegionMaster();
+
+    void onCustomAuthenticationIntermediateStep(const ExitGames::Common::Dictionary<ExitGames::Common::JString, ExitGames::Common::Object>& authValues) override;
+
     void onStatusChanged(int statusCode) override;
     void onEvent(const ExitGames::Photon::EventData& eventData) override;
     void onPingResponse(const ExitGames::Common::JString& address, unsigned int result) override;
@@ -80,14 +83,6 @@ private:
 
     std::unordered_map<std::string, std::string> m_regions;
 
-    enum class ClientConnectionState {
-        Disconnected,
-        ConnectingToNS,
-        ConnectedToNS,
-        ConnectingToMaster,
-        ConnectedToMaster,
-    } m_connectionState;
-
     std::string m_userId;
     std::string m_authToken;
     std::string m_hwid;
@@ -95,6 +90,38 @@ private:
 
     std::string m_cloudRegion;
     std::string m_photonSecret;
+
+    enum class DisconnectIntention {
+        Unknown,
+        Disconnect,
+        ConnectToNameServer,
+        ConnectToMasterServer,
+        ConnectToGameServer,
+        DisconnectedByServer,
+        DisconnectedByServerLogic,
+        DisconnectedByServerUserLimit,
+    } m_disconnectIntention;
+    void SetDisconnectIntention(DisconnectIntention disconnectIntention);
+    std::string_view GetDisconnectIntentionString();
+    enum class ConnectionState {
+        Disconnected,
+
+        ConnectingToNameServer,
+        ConnectedToNameServer,
+        DisconnectingFromNameServer,
+
+        ConnectingToMasterServer,
+        ConnectedToMasterServer,
+        DisconnectingFromMasterServer,
+
+        ConnectingToGameServer,
+        ConnectedToGameServer,
+        DisconnectingFromGameServer,
+    } m_connectionState;
+    void SetConnectionState(ConnectionState connectionState);
+    void SetConnectionStateAsConnected();
+    void SetConnectionStateAsDisconnecting();
+    bool GetConnectionStateIsConnected();
 };
 }
 
